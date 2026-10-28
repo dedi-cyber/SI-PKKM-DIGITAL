@@ -33,7 +33,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- jsPDF & html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -196,6 +196,35 @@
                     </div>
                 </div>
 
+                <div id="rnktWrap" class="mb-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">RNKT: Rata-rata Skor Nilai Kinerja Tahun ke-1 s.d. ke-3 (hanya untuk Penilaian 4 Tahunan)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="rnktInput" oninput="onPeranChange()" placeholder="Contoh: 84,50" class="w-full md:w-1/3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">NKKM = (RNKT + 5 x NKTE) / 6. Kosongkan jika belum ada data tahun ke-1 s.d. ke-3.</p>
+                </div>
+
+                <div id="peranWrap" class="mb-6 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+                    <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide mb-1">Skor Peran Tahun Keempat (NKTE, hanya 4 Tahunan)</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Isi nilai kinerja 0 sampai 100 dari setiap peran. Skor Pengawas Madrasah (PM) diambil otomatis dari penilaian Pengawas 1 dan 2.</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="col-span-2 md:col-span-4">
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Jenis Madrasah Penentu Rumus</label>
+                            <select id="peranTipe" onchange="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none">
+                                <option value="negeri">Madrasah Negeri (rumus 7KB dan 13)</option>
+                                <option value="man_ic">MAN Insan Cendekia (rumus 9GTK dan 15)</option>
+                                <option value="swasta">Madrasah Swasta (rumus 8KY dan 14)</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Kepala Bidang (KB)</label><input type="number" step="0.01" min="0" max="100" id="peran_KB" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Kepala Seksi (KS)</label><input type="number" step="0.01" min="0" max="100" id="peran_KS" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Rata-rata Guru (GR)</label><input type="number" step="0.01" min="0" max="100" id="peran_GR" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Rata-rata Tendik (TK)</label><input type="number" step="0.01" min="0" max="100" id="peran_TK" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Rata-rata Komite (KM)</label><input type="number" step="0.01" min="0" max="100" id="peran_KM" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Direktorat GTK (GTK, MAN IC)</label><input type="number" step="0.01" min="0" max="100" id="peran_GTK" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Ketua Yayasan (KY, Swasta)</label><input type="number" step="0.01" min="0" max="100" id="peran_KY" oninput="onPeranChange()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm outline-none"></div>
+                    </div>
+                    <p id="peranStatus" class="text-[11px] mt-2 text-slate-500 dark:text-slate-400"></p>
+                </div>
+
                 <!-- DATA KEPALA MADRASAH & MADRASAH -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 border-t pt-6 border-slate-200 dark:border-slate-700">
                     <!-- Column 1: Kamad -->
@@ -316,7 +345,7 @@
                         <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-3 text-emerald-600"></i> Kepala Kantor Kementerian Agama Kabupaten/Kota
+                                    <i class="fa-solid fa-3 text-emerald-600"></i> Kepala Seksi Penmad (Kasi Pendma Kemenag Kab/Kota)
                                 </span>
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="penilai3_active" class="sr-only peer">
@@ -324,16 +353,16 @@
                                 </label>
                             </div>
                             <div>
-                                <input type="text" id="penilai3_nama" placeholder="Nama Lengkap & Gelar Kepala Kantor Kementerian Agama Kabupaten/Kota" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
-                                <input type="text" id="penilai3_nip" placeholder="NIP Kepala Kantor Kementerian Agama Kabupaten/Kota" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input type="text" id="penilai3_nama" placeholder="Nama Lengkap & Gelar Kasi Penmad" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
+                                <input type="text" id="penilai3_nip" placeholder="NIP Kasi Penmad" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
 
-                        <!-- Penilai 4: Kepala Bidang Pendidikan Madrasah Kanwil Kemenag Provinsi -->
+                        <!-- Penilai 4: Ketua Tim GTK Kanwil -->
                         <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-4 text-emerald-600"></i> Kepala Bidang Pendidikan Madrasah Kanwil Kemenag Provinsi
+                                    <i class="fa-solid fa-4 text-emerald-600"></i> Ketua Tim GTK Kanwil Kemenag Provinsi
                                 </span>
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="penilai4_active" class="sr-only peer">
@@ -341,8 +370,8 @@
                                 </label>
                             </div>
                             <div>
-                                <input type="text" id="penilai4_nama" placeholder="Nama Lengkap & Gelar Kepala Bidang Pendidikan Madrasah Kanwil Kemenag Provinsi" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
-                                <input type="text" id="penilai4_nip" placeholder="NIP Kepala Bidang Pendidikan Madrasah Kanwil Kemenag Provinsi" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input type="text" id="penilai4_nama" placeholder="Nama Lengkap & Gelar Ketua Tim GTK" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
+                                <input type="text" id="penilai4_nip" placeholder="NIP Ketua Tim GTK Kanwil" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
                     </div>
@@ -408,6 +437,7 @@
                         <p class="text-xs font-semibold text-slate-500">Nilai Akhir PKKM</p>
                         <h3 id="rekapNilaiAkhir" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0.00</h3>
                         <span id="rekapPredikat" class="inline-block mt-2 text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">Belum Lengkap</span>
+                        <p id="rekapKeputusan" class="text-[11px] mt-2 text-slate-600 dark:text-slate-300 max-w-xs leading-snug"></p>
                     </div>
                     <div class="bg-emerald-50 dark:bg-emerald-950/60 p-3.5 rounded-2xl text-emerald-600 border border-emerald-200 dark:border-emerald-800">
                         <i class="fa-solid fa-award text-3xl"></i>
@@ -620,11 +650,11 @@
                 <div class="border p-2.5 rounded bg-slate-50 text-[10px] space-y-1 avoid-break">
                     <span class="font-bold">Konversi Nilai Kinerja (SK Dirjen Pendis No. 1111/2019):</span>
                     <div class="grid grid-cols-5 gap-1 text-center">
-                        <div><strong>Amat Baik (A):</strong> 91.00 – 100</div>
-                        <div><strong>Baik (B):</strong> 76.00 – 90.99</div>
-                        <div><strong>Cukup (C):</strong> 61.00 – 75.99</div>
-                        <div><strong>Sedang (D):</strong> 51.00 – 60.99</div>
-                        <div><strong>Kurang (E):</strong> &lt; 51.00</div>
+                        <div><strong>Amat Baik:</strong> 90 &lt; NKKM ≤ 100</div>
+                        <div><strong>Baik:</strong> 75 &lt; NKKM ≤ 90</div>
+                        <div><strong>Cukup:</strong> 60 &lt; NKKM ≤ 75</div>
+                        <div><strong>Sedang:</strong> 50 &lt; NKKM ≤ 60</div>
+                        <div><strong>Kurang:</strong> NKKM ≤ 50</div>
                     </div>
                 </div>
 
@@ -864,10 +894,11 @@
                         code: "2.10",
                         title: "Monitoring, evaluasi, dan pelaporan pelaksanaan program kegiatan",
                         indicators: [
-                            { id: "2.10.1", text: "Menyusun standar kinerja program pendidikan yang dapat diukur (SKP).", evidence: "Dokumen SKP Kepala Madrasah dan Guru.", isDigital: true, isKewirausahaan: false },
-                            { id: "2.10.2", text: "Melakukan monitoring dan evaluasi kinerja program pendidikan.", evidence: "Dokumen instrumen monev program madrasah.", isDigital: false, isKewirausahaan: false },
-                            { id: "2.10.3", text: "Menyusun laporan evaluasi pelaksanaan program.", evidence: "Dokumen Laporan Monev tahunan.", isDigital: false, isKewirausahaan: false },
-                            { id: "2.10.4", text: "Merumuskan program tindak lanjut berdasarkan hasil evaluasi program sebelumnya.", evidence: "Dokumen Program Tindak Lanjut hasil monev.", isDigital: false, isKewirausahaan: false }
+                            { id: "2.10.1", text: "Menyusun standar kinerja program pendidikan yang dapat diukur dan dinilai.", evidence: "Dokumen SKP yang terukur.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.10.2", text: "Melakukan monitoring dan evaluasi kinerja program pendidikan dengan menggunakan teknik yang sesuai.", evidence: "Dokumen pelaksanaan monitoring dan evaluasi yang sesuai.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.10.3", text: "Menyusun laporan sesuai dengan standar pelaporan monitoring dan evaluasi.", evidence: "Dokumen laporan pelaksanaan monitoring dan evaluasi.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.10.4", text: "Menyusun laporan sesuai dengan standar pelaporan monitoring dan evaluasi.", evidence: "Dokumen laporan pelaksanaan monitoring dan evaluasi.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.10.5", text: "Merumuskan program tindak lanjut berdasarkan hasil evaluasi pelaksanaan program sebelumnya.", evidence: "Dokumen program tindak lanjut berdasarkan hasil monitoring dan evaluasi.", isDigital: false, isKewirausahaan: false }
                         ]
                     }
                 ]
@@ -972,37 +1003,19 @@
                         code: "5.1",
                         title: "Prestasi Peserta Didik",
                         indicators: [
-                            { id: "5.1.1", text: "Prestasi akademik peserta didik pada tingkat Kabupaten/Provinsi/Nasional.", evidence: "Piagam, Medali, Sertifikat Juara Lomba Akademik Siswa (KSM, OSN, dll).", isDigital: false, isKewirausahaan: false },
-                            { id: "5.1.2", text: "Prestasi non-akademik peserta didik pada berbagai tingkat.", evidence: "Piagam, Piala Juara Lomba Olahraga, Seni, Pramuka, Robotik, dll.", isDigital: false, isKewirausahaan: false }
-                        ]
-                    },
-                    {
-                        code: "5.2",
-                        title: "Prestasi Pendidik dan Tenaga Kependidikan",
-                        indicators: [
-                            { id: "5.2.1", text: "Prestasi akademik pendidik dan tenaga kependidikan.", evidence: "Piagam/Sertifikat Guru Berprestasi, Anugerah GTK Kemenag, Karya Inovatif.", isDigital: false, isKewirausahaan: false },
-                            { id: "5.2.2", text: "Prestasi non-akademik pendidik dan tenaga kependidikan.", evidence: "Piagam/Piala kejuaraan non-akademik GTK.", isDigital: false, isKewirausahaan: false }
-                        ]
-                    },
-                    {
-                        code: "5.3",
-                        title: "Prestasi Kelembagaan Madrasah",
-                        indicators: [
-                            { id: "5.3.1", text: "Kelebihan/keunggulan prestasi akademik madrasah dari sekolah lain.", evidence: "Sertifikat Akreditasi A, Madrasah Unggulan, Rata-rata nilai ujian tinggi.", isDigital: false, isKewirausahaan: true },
-                            { id: "5.3.2", text: "Kelebihan prestasi non-akademik madrasah dari sekolah lain.", evidence: "Penghargaan Madrasah Adiwiyata, Madrasah Ramah Anak, Madrasah Digital.", isDigital: true, isKewirausahaan: true }
-                        ]
-                    },
-                    {
-                        code: "5.4",
-                        title: "Prestasi Kepala Madrasah",
-                        indicators: [
-                            { id: "5.4.1", text: "Ijazah dan kualifikasi akademik yang dimiliki kepala madrasah.", evidence: "Dokumen Ijazah S1/S2/S3 Kepala Madrasah.", isDigital: false, isKewirausahaan: false },
-                            { id: "5.4.2", text: "Pendidikan dan pelatihan (diklat) yang pernah diikuti kepala madrasah.", evidence: "Sertifikat Diklat Teknis/Fungsional Kepemimpinan Kepala Madrasah.", isDigital: true, isKewirausahaan: false },
-                            { id: "5.4.3", text: "Penguasaan ICT (Teknologi Informasi & Komunikasi) kepala madrasah.", evidence: "Praktik langsung penguasaan laptop, aplikasi SIM, email, presentasi digital.", isDigital: true, isKewirausahaan: false },
-                            { id: "5.4.4", text: "Prestasi akademik maupun non-akademik yang diraih oleh kepala madrasah.", evidence: "Piagam, Medali, Penghargaan Kepala Madrasah Berprestasi.", isDigital: false, isKewirausahaan: true },
-                            { id: "5.4.5", text: "Kegiatan penelitian kependidikan (PTS/PTK) yang telah dilakukan kepala madrasah.", evidence: "Laporan Karya Tulis Ilmiah / Penelitian Tindakan Sekolah (PTS).", isDigital: false, isKewirausahaan: false },
-                            { id: "5.4.6", text: "Pelibatan masyarakat dan komite madrasah dalam mendukung program.", evidence: "Dokumen rapat komite, Laporan bantuan/partisipasi masyarakat.", isDigital: false, isKewirausahaan: true },
-                            { id: "5.4.7", text: "Kegiatan kemitraan dengan stakeholder pendidikan dalam meningkatkan kompetensi.", evidence: "Dokumen Perjanjian Kerjasama (MoU) Kemitraan.", isDigital: false, isKewirausahaan: true }
+                            { id: "5.1.1", text: "Prestasi akademik peserta didik.", evidence: "Piagam dan piala prestasi akademik.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.1.2", text: "Prestasi non akademik peserta didik.", evidence: "Piagam dan piala prestasi non akademik.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.2.1", text: "Prestasi akademik pendidik dan tenaga kependidikan.", evidence: "Piagam dan piala prestasi akademik pendidik dan tenaga kependidikan.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.2.2", text: "Prestasi non akademik pendidik dan tenaga kependidikan.", evidence: "Piagam dan piala prestasi non akademik pendidik dan tenaga kependidikan.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.3.1", text: "Kelebihan prestasi akademik madrasah dibanding madrasah/sekolah lain.", evidence: "Piagam, piala, dan laporan lomba akademik yang diikuti.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.3.2", text: "Kelebihan prestasi non akademik madrasah dibanding madrasah/sekolah lain.", evidence: "Piagam, piala, dan laporan kegiatan lomba non akademik yang diikuti.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.1", text: "Ijazah yang dimiliki kepala madrasah.", evidence: "Dokumen ijazah kepala madrasah.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.2", text: "Pendidikan dan pelatihan yang pernah diikuti kepala madrasah.", evidence: "Dokumen sertifikat diklat.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.3", text: "Penguasaan ICT kepala madrasah.", evidence: "Praktik penggunaan ICT.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.4", text: "Prestasi, akademik maupun non akademik, yang diraih kepala madrasah.", evidence: "Piagam, medali, piala, atau SK.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.5", text: "Kegiatan penelitian kependidikan yang telah dilakukan kepala madrasah.", evidence: "Karya ilmiah hasil penelitian bidang pendidikan.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.6", text: "Kegiatan pelibatan masyarakat (komite madrasah) dalam mendukung program madrasah.", evidence: "Dokumen program kegiatan, laporan kegiatan, dan notulen rapat dengan komite madrasah.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.7", text: "Kegiatan kemitraan dengan stakeholder pendidikan dalam meningkatkan kompetensi guru madrasah.", evidence: "Dokumen program kegiatan, perjanjian kerja sama kemitraan.", isDigital: false, isKewirausahaan: false }
                         ]
                     }
                 ]
@@ -1074,6 +1087,10 @@
             document.getElementById('tahunKe').value = id.tahunKe || 'Tahun Ke-1';
             document.getElementById('tahunPelajaran').value = id.tahunPelajaran || '2025/2026';
             document.getElementById('tglPenilaian').value = id.tglPenilaian || new Date().toISOString().split('T')[0];
+            document.getElementById('rnktInput').value = id.rnkt || '';
+            const pr = id.peran || {};
+            ['KB','KS','GR','TK','KM','GTK','KY'].forEach(k => { document.getElementById('peran_' + k).value = pr[k] ?? ''; });
+            document.getElementById('peranTipe').value = pr.tipe || (id.madrasahStatus === 'Swasta' ? 'swasta' : 'negeri');
 
             document.getElementById('kamadNama').value = id.kamadNama || '';
             document.getElementById('kamadNip').value = id.kamadNip || '';
@@ -1140,6 +1157,9 @@
         function handleJenisPenilaianChange(shouldRender = true) {
             const val = document.getElementById('jenisPenilaian').value;
             appState.identitas.jenisPenilaian = val;
+            const is4 = val === '4tahunan';
+            document.getElementById('peranWrap').style.display = is4 ? '' : 'none';
+            document.getElementById('rnktWrap').style.display = is4 ? '' : 'none';
 
             const btn5 = document.getElementById('comp-btn-5');
             if (val === '4tahunan') {
@@ -1196,6 +1216,29 @@
         /* ==========================================================================
            RENDER INSTRUMENT INDICATORS
            ========================================================================== */
+        function onPeranChange() {
+            saveIdentitasFromUI();
+            saveStateToLocalStorage();
+            updateAllCalculations();
+        }
+
+        function renderScoreGroup(indId, indData, field, label) {
+            const val = indData[field] || 0;
+            const btns = [1, 2, 3, 4].map(s => {
+                let cls = "w-8 h-8 rounded-lg text-xs font-extrabold transition flex items-center justify-center ";
+                if (val === s) {
+                    if (s === 4) cls += "bg-emerald-600 text-white shadow-md scale-105";
+                    else if (s === 3) cls += "bg-blue-600 text-white shadow-md scale-105";
+                    else if (s === 2) cls += "bg-amber-500 text-white shadow-md scale-105";
+                    else cls += "bg-rose-600 text-white shadow-md scale-105";
+                } else {
+                    cls += "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600";
+                }
+                return `<button onclick="setIndicatorScore('${indId}', ${s}, '${field}')" class="${cls}">${s}</button>`;
+            }).join('');
+            return `<div class="flex items-center gap-1.5"><span class="text-[10px] font-bold text-slate-500 w-6">${label}</span><div class="flex items-center space-x-1">${btns}</div></div>`;
+        }
+
         function renderIndicators() {
             const container = document.getElementById('indicatorsContainer');
             container.innerHTML = '';
@@ -1255,21 +1298,10 @@
                                     <p class="text-[11px] text-slate-500 dark:text-slate-400 italic"><strong>Bukti Fisik Diharapkan:</strong> ${ind.evidence}</p>
                                 </div>
 
-                                <!-- SCORING BUTTONS 1 - 4 -->
-                                <div class="flex items-center space-x-1.5 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-                                    ${[1, 2, 3, 4].map(s => {
-                                        const active = indData.score === s;
-                                        let btnClass = "w-8 h-8 rounded-lg text-xs font-extrabold transition flex items-center justify-center ";
-                                        if (active) {
-                                            if (s === 4) btnClass += "bg-emerald-600 text-white shadow-md scale-105";
-                                            else if (s === 3) btnClass += "bg-blue-600 text-white shadow-md scale-105";
-                                            else if (s === 2) btnClass += "bg-amber-500 text-white shadow-md scale-105";
-                                            else if (s === 1) btnClass += "bg-rose-600 text-white shadow-md scale-105";
-                                        } else {
-                                            btnClass += "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600";
-                                        }
-                                        return `<button onclick="setIndicatorScore('${ind.id}', ${s})" class="${btnClass}">${s}</button>`;
-                                    }).join('')}
+                                <!-- SCORING BUTTONS: PENILAI 1 DAN PENILAI 2 -->
+                                <div class="flex flex-col gap-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    ${renderScoreGroup(ind.id, indData, 'score', 'P1')}
+                                    ${appState.identitas.penilai2?.active ? renderScoreGroup(ind.id, indData, 'score2', 'P2') : ''}
                                 </div>
                             </div>
 
@@ -1304,9 +1336,9 @@
         /* ==========================================================================
            SCORING & META UPDATES
            ========================================================================== */
-        function setIndicatorScore(indId, scoreVal) {
-            if (!appState.scores[indId]) appState.scores[indId] = { score: 0, note: '', link: '' };
-            appState.scores[indId].score = scoreVal;
+        function setIndicatorScore(indId, scoreVal, field = 'score') {
+            if (!appState.scores[indId]) appState.scores[indId] = { score: 0, score2: 0, note: '', link: '' };
+            appState.scores[indId][field] = scoreVal;
             saveStateToLocalStorage();
             renderIndicators();
             updateAllCalculations();
@@ -1323,6 +1355,11 @@
             appState.identitas.tahunKe = document.getElementById('tahunKe').value;
             appState.identitas.tahunPelajaran = document.getElementById('tahunPelajaran').value;
             appState.identitas.tglPenilaian = document.getElementById('tglPenilaian').value;
+            appState.identitas.rnkt = document.getElementById('rnktInput').value;
+            const pr = {};
+            ['KB','KS','GR','TK','KM','GTK','KY'].forEach(k => { pr[k] = document.getElementById('peran_' + k).value; });
+            pr.tipe = document.getElementById('peranTipe').value;
+            appState.identitas.peran = pr;
 
             appState.identitas.kamadNama = document.getElementById('kamadNama').value;
             appState.identitas.kamadNip = document.getElementById('kamadNip').value;
@@ -1373,67 +1410,86 @@
            CALCULATIONS & SCORE COMPUTATION
            ========================================================================== */
         function computeScores() {
-            const is4Thn = appState.identitas.jenisPenilaian === '4tahunan';
+            const id = appState.identitas;
+            const is4Thn = id.jenisPenilaian === '4tahunan';
             const compsToCalculate = is4Thn ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
+            const useP2 = !!id.penilai2?.active;
 
-            let grandTotalMax = 0;
-            let grandTotalRiil = 0;
-            let grandTotalIndikatorCount = 0;
-            let totalFilledCount = 0;
-
+            let grandMax = 0, grandRiil1 = 0, grandRiil2 = 0, grandIndCount = 0, totalFilledCount = 0;
             let digitalMax = 0, digitalRiil = 0;
             let kwuMax = 0, kwuRiil = 0;
-
             const compResults = {};
 
             compsToCalculate.forEach(cNum => {
                 const compDef = INSTRUMEN_DATA.find(c => c.compNumber === cNum);
                 if (!compDef) return;
 
-                let cIndCount = 0;
-                let cMaxScore = 0;
-                let cRiilScore = 0;
-                let cFilledCount = 0;
+                let cIndCount = 0, cMax = 0, cRiil1 = 0, cRiil2 = 0, cFilled = 0;
 
                 compDef.unsurs.forEach(u => {
                     u.indicators.forEach(ind => {
+                        const d = appState.scores[ind.id] || {};
+                        const s1 = d.score || 0;
+                        const s2 = d.score2 || 0;
+                        const sAvg = useP2 ? (s1 + s2) / 2 : s1;
                         cIndCount++;
-                        cMaxScore += 4;
-                        const score = appState.scores[ind.id]?.score || 0;
-                        cRiilScore += score;
-                        if (score > 0) cFilledCount++;
+                        cMax += 4;
+                        cRiil1 += s1;
+                        cRiil2 += s2;
+                        if (s1 > 0 || s2 > 0) cFilled++;
 
-                        if (ind.isDigital) {
-                            digitalMax += 4;
-                            digitalRiil += score;
-                        }
-                        if (ind.isKewirausahaan) {
-                            kwuMax += 4;
-                            kwuRiil += score;
-                        }
+                        if (ind.isDigital) { digitalMax += 4; digitalRiil += sAvg; }
+                        if (ind.isKewirausahaan) { kwuMax += 4; kwuRiil += sAvg; }
                     });
                 });
 
-                const capPercent = cMaxScore > 0 ? (cRiilScore / cMaxScore) * 100 : 0;
-                let kat = getPredikatCategory(capPercent);
+                const nk1 = cMax > 0 ? (cRiil1 / cMax) * 100 : 0;
+                const nk2 = cMax > 0 ? (cRiil2 / cMax) * 100 : 0;
+                const capPercent = useP2 ? (nk1 + nk2) / 2 : nk1;
 
                 compResults[cNum] = {
                     title: compDef.title,
                     indCount: cIndCount,
-                    maxScore: cMaxScore,
-                    riilScore: cRiilScore,
-                    filledCount: cFilledCount,
+                    maxScore: cMax,
+                    riilScore: useP2 ? (cRiil1 + cRiil2) / 2 : cRiil1,
+                    filledCount: cFilled,
                     percent: capPercent,
-                    category: kat
+                    category: getPredikatCategory(capPercent)
                 };
 
-                grandTotalIndikatorCount += cIndCount;
-                grandTotalMax += cMaxScore;
-                grandTotalRiil += cRiilScore;
-                totalFilledCount += cFilledCount;
+                grandIndCount += cIndCount;
+                grandMax += cMax;
+                grandRiil1 += cRiil1;
+                grandRiil2 += cRiil2;
+                totalFilledCount += cFilled;
             });
 
-            const overallPercent = grandTotalMax > 0 ? (grandTotalRiil / grandTotalMax) * 100 : 0;
+            const nk1Total = grandMax > 0 ? (grandRiil1 / grandMax) * 100 : 0;
+            const nk2Total = grandMax > 0 ? (grandRiil2 / grandMax) * 100 : 0;
+            const nkt = useP2 ? (nk1Total + nk2Total) / 2 : nk1Total;
+            const grandRiil = useP2 ? (grandRiil1 + grandRiil2) / 2 : grandRiil1;
+
+            const rnktVal = parseFloat(id.rnkt);
+            const hasRnkt = !isNaN(rnktVal) && rnktVal > 0;
+
+            // NKTE dari skor peran (SK 1111/2019 huruf 4). PM = rata-rata skor pengawas (NK pengawas).
+            const pr = id.peran || {};
+            const num = v => { const x = parseFloat(v); return isNaN(x) ? null : x; };
+            const PM = nkt;
+            const KB = num(pr.KB), KS = num(pr.KS), GR = num(pr.GR), TK = num(pr.TK), KM = num(pr.KM), GTK = num(pr.GTK), KY = num(pr.KY);
+            let nkteHitung = null;
+            if (is4Thn) {
+                if (pr.tipe === 'man_ic') {
+                    if ([GTK, KB, GR, TK, KM].every(v => v !== null)) nkteHitung = (9 * GTK + 2 * KB + PM + GR + TK + KM) / 15;
+                } else if (pr.tipe === 'swasta') {
+                    if ([KY, KS, GR, TK, KM].every(v => v !== null)) nkteHitung = (8 * KY + 2 * KS + PM + GR + TK + KM) / 14;
+                } else {
+                    if ([KB, KS, GR, TK, KM].every(v => v !== null)) nkteHitung = (7 * KB + 2 * KS + PM + GR + TK + KM) / 13;
+                }
+            }
+            const peranLengkap = nkteHitung !== null;
+            const nkteUse = is4Thn ? (peranLengkap ? nkteHitung : nkt) : nkt;
+            const overallPercent = (is4Thn && hasRnkt) ? (rnktVal + 5 * nkteUse) / 6 : nkteUse;
             const overallPredikat = getPredikatCategory(overallPercent);
 
             const digitalPercent = digitalMax > 0 ? (digitalRiil / digitalMax) * 100 : 0;
@@ -1441,23 +1497,58 @@
 
             return {
                 compResults,
-                grandTotalIndikatorCount,
-                grandTotalMax,
-                grandTotalRiil,
+                grandTotalIndikatorCount: grandIndCount,
+                grandTotalMax: grandMax,
+                grandTotalRiil: Math.round(grandRiil * 100) / 100,
                 totalFilledCount,
                 overallPercent,
                 overallPredikat,
                 digitalPercent,
-                kwuPercent
+                kwuPercent,
+                nk1: nk1Total,
+                nk2: nk2Total,
+                nkt,
+                useP2,
+                is4Thn,
+                rnkt: hasRnkt ? rnktVal : null,
+                nkte: nkteUse,
+                peranLengkap,
+                hasRnkt,
+                pm: PM
             };
         }
 
+        function getKeputusan(data) {
+            const p = data.overallPredikat.label;
+            let txt;
+            if (!data.is4Thn) {
+                txt = (p === 'Amat Baik' || p === 'Baik')
+                    ? 'Predikat minimal baik. Kepala madrasah dapat melanjutkan masa jabatan.'
+                    : 'Predikat kurang, sedang, atau cukup. Kepala madrasah diberhentikan dari jabatan.';
+            } else {
+                if (p === 'Amat Baik') txt = 'Predikat amat baik. Kepala madrasah dapat melanjutkan masa jabatan pada periode keempat.';
+                else if (p === 'Baik') txt = 'Predikat baik. Jika ingin melanjutkan jabatan pada periode keempat, wajib mengikuti uji kompetensi.';
+                else txt = 'Predikat kurang, sedang, atau cukup. Kepala madrasah diberhentikan dari jabatannya.';
+            }
+            const catatan = [];
+            if (data.is4Thn && !data.peranLengkap) catatan.push('NKTE masih memakai nilai pengawas karena skor peran belum lengkap. Hasil ini sementara.');
+            if (data.is4Thn && !data.hasRnkt) catatan.push('RNKT belum diisi, sehingga NKKM belum dapat dihitung dan yang tampil adalah NKTE.');
+            return { txt, catatan: catatan.join(' ') };
+        }
+
+        function renderKeputusan(data) {
+            const k = getKeputusan(data);
+            const el = document.getElementById('rekapKeputusan');
+            if (!el) return;
+            el.innerText = k.txt + (k.catatan ? ' ' + k.catatan : '');
+        }
+
         function getPredikatCategory(percent) {
-            if (percent >= 91.00) return { label: "Amat Baik", code: "A", color: "bg-emerald-100 text-emerald-800" };
-            if (percent >= 76.00) return { label: "Baik", code: "B", color: "bg-blue-100 text-blue-800" };
-            if (percent >= 61.00) return { label: "Cukup", code: "C", color: "bg-amber-100 text-amber-800" };
-            if (percent >= 51.00) return { label: "Sedang", code: "D", color: "bg-orange-100 text-orange-800" };
-            return { label: "Kurang", code: "E", color: "bg-rose-100 text-rose-800" };
+            if (percent > 90) return { label: "Amat Baik", code: "", color: "bg-emerald-100 text-emerald-800" };
+            if (percent > 75) return { label: "Baik", code: "", color: "bg-blue-100 text-blue-800" };
+            if (percent > 60) return { label: "Cukup", code: "", color: "bg-amber-100 text-amber-800" };
+            if (percent > 50) return { label: "Sedang", code: "", color: "bg-orange-100 text-orange-800" };
+            return { label: "Kurang", code: "", color: "bg-rose-100 text-rose-800" };
         }
 
         function updateNavBadges() {
@@ -1483,8 +1574,9 @@
 
             document.getElementById('rekapNilaiAkhir').innerText = data.overallPercent.toFixed(2);
             const badgeEl = document.getElementById('rekapPredikat');
-            badgeEl.innerText = `${data.overallPredikat.label} (${data.overallPredikat.code})`;
+            badgeEl.innerText = `${data.overallPredikat.label}`;
             badgeEl.className = `inline-block mt-2 text-xs px-2.5 py-0.5 rounded-full font-bold ${data.overallPredikat.color}`;
+            renderKeputusan(data);
 
             document.getElementById('rekapSkorTotal').innerText = `${data.grandTotalRiil} / ${data.grandTotalMax}`;
             document.getElementById('rekapMaxSkorText').innerText = `Maksimal Skor: ${data.grandTotalMax}`;
@@ -1603,7 +1695,7 @@
             document.getElementById('printTotalMaxScore').innerText = data.grandTotalMax;
             document.getElementById('printTotalRiilScore').innerText = data.grandTotalRiil;
             document.getElementById('printTotalCapaianPercent').innerText = `${data.overallPercent.toFixed(2)}%`;
-            document.getElementById('printPredikatLabel').innerText = `${data.overallPredikat.label} (${data.overallPredikat.code})`;
+            document.getElementById('printPredikatLabel').innerText = `${data.overallPredikat.label}`;
 
             document.getElementById('printCatatanKelebihan').innerText = id.catatanKelebihan || 'Belum ada catatan keunggulan.';
             document.getElementById('printCatatanRekomendasi').innerText = id.catatanRekomendasi || 'Belum ada rekomendasi tindak lanjut.';
