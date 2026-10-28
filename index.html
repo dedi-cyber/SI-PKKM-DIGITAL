@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKKM Digital 2026 - Penilaian Kinerja Kepala Madrasah</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        kemenag: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm 15mm 15mm;
+            }
+            .page-break { page-break-before: always; }
+            .avoid-break { page-break-inside: avoid; }
+            .a4-container {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-emerald-800 text-white shadow-lg sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand & Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/10 p-2 rounded-xl backdrop-blur-md">
+                        <i class="fa-solid me-1 fa-school-flag text-emerald-300 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight tracking-wide flex items-center gap-2">
+                            SI-PKKM DIGITAL <span class="bg-emerald-600 text-xs text-emerald-100 px-2 py-0.5 rounded-full font-semibold border border-emerald-400">2026</span>
+                        </h1>
+                        <p class="text-xs text-emerald-200">Penilaian Kinerja Kepala Madrasah (SK Dirjen Pendis No. 1111/2019)</p>
+                    </div>
+                </div>
+
+                <!-- Status Badges & Quick Action Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="hidden md:flex items-center space-x-3 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-700/50 text-xs">
+                        <div class="text-right">
+                            <span class="block text-emerald-300 text-[10px] uppercase tracking-wider font-semibold">Progres Penilaian</span>
+                            <span id="navProgressText" class="font-bold text-white">0 / 96 (0%)</span>
+                        </div>
+                        <div class="w-16 bg-emerald-950 rounded-full h-2.5 overflow-hidden">
+                            <div id="navProgressBar" class="bg-emerald-400 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="hidden lg:flex items-center space-x-2 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-700/50 text-xs">
+                        <span class="text-emerald-300 text-[10px] uppercase font-semibold">Nilai Akhir:</span>
+                        <span id="navTotalScore" class="font-extrabold text-amber-300 text-sm">0.00</span>
+                        <span id="navPredikatBadge" class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded font-bold">-</span>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 text-emerald-200 hover:text-white hover:bg-emerald-700/50 rounded-lg transition" title="Ganti Mode Gelap/Terang">
+                        <i class="fa-solid fa-moon text-lg" id="themeIcon"></i>
+                    </button>
+
+                    <!-- Data Backup & Restore Options -->
+                    <div class="relative group">
+                        <button class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-database"></i> <span class="hidden sm:inline">Data</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </button>
+                        <div class="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl py-2 z-50 hidden group-hover:block border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200">
+                            <a href="#" onclick="exportDataJSON()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700"><i class="fa-solid fa-download text-emerald-600 mr-2"></i> Ekspor Cadangan (JSON)</a>
+                            <label class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer">
+                                <i class="fa-solid fa-upload text-blue-600 mr-2"></i> Impor Cadangan
+                                <input type="file" id="importJsonInput" accept=".json" onchange="importDataJSON(event)" class="hidden">
+                            </label>
+                            <hr class="my-1 border-slate-200 dark:border-slate-700">
+                            <a href="#" onclick="resetAllDataModal()" class="block px-4 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30"><i class="fa-solid fa-rotate-left mr-2"></i> Reset Seluruh Data</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN NAVIGATION TABS -->
+        <div class="bg-emerald-900 border-t border-emerald-700/60 no-print overflow-x-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto px-4 flex space-x-1 sm:space-x-2 text-xs font-medium py-1.5">
+                <button onclick="switchTab('tab-identitas')" id="btn-tab-identitas" class="tab-btn active-tab flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-emerald-100 font-semibold transition whitespace-nowrap">
+                    <i class="fa-solid fa-id-card"></i> 1. Identitas & Penilai
+                </button>
+                <button onclick="switchTab('tab-instrumen')" id="btn-tab-instrumen" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-emerald-200 hover:text-white transition whitespace-nowrap">
+                    <i class="fa-solid fa-clipboard-check"></i> 2. Instrumen Penilaian
+                </button>
+                <button onclick="switchTab('tab-rekapitulasi')" id="btn-tab-rekapitulasi" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-emerald-200 hover:text-white transition whitespace-nowrap">
+                    <i class="fa-solid fa-chart-pie"></i> 3. Hasil & Rekapitulasi
+                </button>
+                <button onclick="switchTab('tab-cetak')" id="btn-tab-cetak" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-emerald-200 hover:text-white transition whitespace-nowrap">
+                    <i class="fa-solid fa-print"></i> 4. Cetak Laporan A4 / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP BODY -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-3 sm:p-6">
+
+        <!-- TAB 1: IDENTITAS & PENILAI -->
+        <section id="tab-identitas" class="tab-content block space-y-6">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between border-b pb-4 mb-6 border-slate-200 dark:border-slate-700">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-emerald-600"></i> Pengaturan Periode & Jenis Penilaian
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Pilih jenis penilaian (Tahunan atau 4-Tahunan) sesuai regulasi SK Dirjen Pendis 1111/2019.</p>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 text-xs px-3 py-1 rounded-full font-semibold border border-emerald-300">Form Identitas</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Penilaian Kinerja <span class="text-rose-500">*</span></label>
+                        <select id="jenisPenilaian" onchange="handleJenisPenilaianChange()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="tahunan">Penilaian Tahunan (Tahun 1, 2, atau 3) - 96 Indikator</option>
+                            <option value="4tahunan">Penilaian 4 Tahunan (Akhir Periode Jabatan) - 109 Indikator</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Penilaian Ke- / Periode</label>
+                        <select id="tahunKe" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="Tahun Ke-1">Tahun Ke-1</option>
+                            <option value="Tahun Ke-2">Tahun Ke-2</option>
+                            <option value="Tahun Ke-3">Tahun Ke-3</option>
+                            <option value="Periode 4 Tahunan">Periode Kumulatif 4 Tahunan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pelajaran / Tanggal Penilaian</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="tahunPelajaran" value="2025/2026" placeholder="2025/2026" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input type="date" id="tglPenilaian" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DATA KEPALA MADRASAH & MADRASAH -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 border-t pt-6 border-slate-200 dark:border-slate-700">
+                    <!-- Column 1: Kamad -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-user-tie"></i> Data Kepala Madrasah yang Dinilai
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap & Gelar <span class="text-rose-500">*</span></label>
+                            <input type="text" id="kamadNama" placeholder="Contoh: Dr. H. Ahmad Fauzi, M.Pd." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">NIP / NPK</label>
+                                <input type="text" id="kamadNip" placeholder="197508122005011002" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pangkat / Golongan</label>
+                                <input type="text" id="kamadGolongan" placeholder="Pembina IV/a" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">TMT Kepala Madrasah</label>
+                                <input type="text" id="kamadTmt" placeholder="01 Januari 2022" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pendidikan Terakhir</label>
+                                <input type="text" id="kamadPendidikan" placeholder="S2 Manajemen Pendidikan" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Madrasah -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-building-columns"></i> Data Satuan Pendidikan / Madrasah
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Madrasah <span class="text-rose-500">*</span></label>
+                            <input type="text" id="madrasahNama" placeholder="Contoh: MAN 1 Kota Malang" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">NSM / NPSN</label>
+                                <input type="text" id="madrasahNsm" placeholder="131135730001" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Madrasah</label>
+                                <select id="madrasahStatus" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    <option value="Negeri">Negeri</option>
+                                    <option value="Swasta">Swasta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Lengkap Madrasah</label>
+                            <input type="text" id="madrasahAlamat" placeholder="Jl. Bandung No. 7 Kota Malang" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kabupaten / Kota</label>
+                                <input type="text" id="madrasahKabupaten" placeholder="Kota Malang" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Provinsi</label>
+                                <input type="text" id="madrasahProvinsi" placeholder="Jawa Timur" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIM PENILAI KINERJA (4 JENIS SEPERTI DIREQUEST) -->
+                <div class="border-t pt-6 border-slate-200 dark:border-slate-700 mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-user-check"></i> Tim Penilai Kinerja Kepala Madrasah (4 Unsur Penilai)
+                        </h3>
+                        <span class="text-xs text-slate-500">Centang penilai yang aktif melakukan penilaian</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Penilai 1: Pengawas Pembina -->
+                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-1 text-emerald-600"></i> Pengawas Pembina (Ketua Tim)
+                                </span>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="penilai1_active" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="text" id="penilai1_nama" placeholder="Nama Lengkap & Gelar Pengawas Pembina" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
+                                <input type="text" id="penilai1_nip" placeholder="NIP Pengawas Pembina" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Penilai 2: Pengawas Penilai -->
+                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-2 text-emerald-600"></i> Pengawas Penilai (Anggota)
+                                </span>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="penilai2_active" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="text" id="penilai2_nama" placeholder="Nama Lengkap & Gelar Pengawas Penilai" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
+                                <input type="text" id="penilai2_nip" placeholder="NIP Pengawas Penilai" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Penilai 3: Kepala Seksi Penmad -->
+                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-3 text-emerald-600"></i> Kepala Seksi Penmad (Kasi Pendma Kemenag Kab/Kota)
+                                </span>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="penilai3_active" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="text" id="penilai3_nama" placeholder="Nama Lengkap & Gelar Kasi Penmad" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
+                                <input type="text" id="penilai3_nip" placeholder="NIP Kasi Penmad" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Penilai 4: Ketua Tim GTK Kanwil -->
+                        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-4 text-emerald-600"></i> Ketua Tim GTK Kanwil Kemenag Provinsi
+                                </span>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="penilai4_active" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="text" id="penilai4_nama" placeholder="Nama Lengkap & Gelar Ketua Tim GTK" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none mb-2">
+                                <input type="text" id="penilai4_nip" placeholder="NIP Ketua Tim GTK Kanwil" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button onclick="saveIdentitasForm()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-xs">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Data & Lanjut ke Instrumen
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: INSTRUMEN PENILAIAN -->
+        <section id="tab-instrumen" class="tab-content hidden space-y-6">
+            <!-- Filter Bar & Component Tabs -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 sticky top-16 z-30 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <!-- Category Selector -->
+                    <div class="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 max-w-full text-xs">
+                        <button onclick="filterComponent(1)" id="comp-btn-1" class="comp-btn active-comp bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap">1. Usaha Pengem. (25)</button>
+                        <button onclick="filterComponent(2)" id="comp-btn-2" class="comp-btn bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap">2. Manajerial (42)</button>
+                        <button onclick="filterComponent(3)" id="comp-btn-3" class="comp-btn bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap">3. Kewirausahaan (19)</button>
+                        <button onclick="filterComponent(4)" id="comp-btn-4" class="comp-btn bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap">4. Supervisi (10)</button>
+                        <button onclick="filterComponent(5)" id="comp-btn-5" class="comp-btn hidden bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg font-semibold whitespace-nowrap">5. Hasil Kinerja (13)</button>
+                    </div>
+
+                    <!-- Filter Special Focus -->
+                    <div class="flex items-center space-x-2 text-xs">
+                        <button onclick="toggleFilterFocus('digital')" id="btnFilterDigital" class="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 hover:bg-blue-50 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1 transition">
+                            <i class="fa-solid fa-laptop-code text-blue-500"></i> <span class="hidden sm:inline">Transformasi</span> Digital
+                        </button>
+                        <button onclick="toggleFilterFocus('kewirausahaan')" id="btnFilterKewirausahaan" class="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 hover:bg-amber-50 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1 transition">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Kewirausahaan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Component Progress Bar -->
+                <div class="flex items-center justify-between text-xs bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-2">
+                        <span id="activeCompTitle" class="font-bold text-slate-800 dark:text-slate-200">Komponen 1: Usaha Pengembangan Madrasah</span>
+                        <span id="activeCompBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-semibold">0 / 25 Terisi</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-500 hidden sm:inline">Rata-rata Komponen: <strong id="activeCompAvg" class="text-emerald-600 font-bold">0.00</strong> / 4.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTAINER LIST OF INDICATORS -->
+            <div id="indicatorsContainer" class="space-y-4">
+                <!-- Dynamically Populated by JS -->
+            </div>
+        </section>
+
+        <!-- TAB 3: HASIL & REKAPITULASI -->
+        <section id="tab-rekapitulasi" class="tab-content hidden space-y-6">
+            <!-- EXECUTIVE SUMMARY CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Nilai Akhir PKKM</p>
+                        <h3 id="rekapNilaiAkhir" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0.00</h3>
+                        <span id="rekapPredikat" class="inline-block mt-2 text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">Belum Lengkap</span>
+                    </div>
+                    <div class="bg-emerald-50 dark:bg-emerald-950/60 p-3.5 rounded-2xl text-emerald-600 border border-emerald-200 dark:border-emerald-800">
+                        <i class="fa-solid fa-award text-3xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Total Skor Perolehan</p>
+                        <h3 id="rekapSkorTotal" class="text-2xl font-bold text-slate-800 dark:text-white mt-1">0 / 384</h3>
+                        <p class="text-[11px] text-slate-400 mt-1" id="rekapMaxSkorText">Maksimal Skor: 384</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-950/60 p-3.5 rounded-2xl text-blue-600 border border-blue-200 dark:border-blue-800">
+                        <i class="fa-solid fa-calculator text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Transformasi Digital</p>
+                        <h3 id="rekapDigitalScore" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">0.00 %</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Fokus Paperless & TIK</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-950/60 p-3.5 rounded-2xl text-blue-500 border border-blue-200 dark:border-blue-800">
+                        <i class="fa-solid fa-laptop-code text-2xl"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500">Skor Kewirausahaan</p>
+                        <h3 id="rekapKewirausahaanScore" class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">0.00 %</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Kemandirian & Inovasi</p>
+                    </div>
+                    <div class="bg-amber-50 dark:bg-amber-950/60 p-3.5 rounded-2xl text-amber-500 border border-amber-200 dark:border-amber-800">
+                        <i class="fa-solid fa-lightbulb text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPONENT BREAKDOWN TABLE & RADAR CHART -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Table -->
+                <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-emerald-600"></i> Rekapitulasi Nilai Per Komponen Utama
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left text-slate-700 dark:text-slate-300 border-collapse">
+                            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 uppercase font-bold text-[10px]">
+                                <tr>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600">No</th>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600">Komponen Penilaian</th>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600 text-center">Jml Indikator</th>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600 text-center">Skor Maks</th>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600 text-center">Skor Riil</th>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600 text-center">Capaian (%)</th>
+                                    <th class="p-2.5 border border-slate-200 dark:border-slate-600 text-center">Kategori</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rekapTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Radar Chart Visual -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-between">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-sm w-full text-left mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-radar text-emerald-600"></i> Diagram Radar Capaian
+                    </h3>
+                    <div class="w-full h-64 flex items-center justify-center">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <p class="text-[11px] text-slate-400 text-center mt-2">Visualisasi pemetaan kompetensi Kepala Madrasah berbasis 5 pilar utama.</p>
+                </div>
+            </div>
+
+            <!-- CATATAN & REKOMENDASI PENILAI -->
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+                <h3 class="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-comment-dots text-emerald-600"></i> Catatan Evaluasi & Rekomendasi Tim Penilai
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keunggulan & Kinerja Positif Kepala Madrasah</label>
+                        <textarea id="catatanKelebihan" rows="4" placeholder="Tuliskan poin-poin keunggulan, inovasi, dan prestasi..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekomendasi Tindak Lanjut / Pengemb. Keprofesian Berkelanjutan (PKB)</label>
+                        <textarea id="catatanRekomendasi" rows="4" placeholder="Tuliskan rekomendasi perbaikan dan pembinaan berkelanjutan..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PRATINJAU & CETAK LAPORAN A4 -->
+        <section id="tab-cetak" class="tab-content hidden space-y-6">
+            <!-- Action Toolbar -->
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div>
+                    <h3 class="font-bold text-slate-800 dark:text-white text-sm">Pratinjau Dokumen Hasil PKKM A4</h3>
+                    <p class="text-xs text-slate-500">Dokumen diformat khusus kertas A4 sesuai standar Kementerian Agama RI.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition">
+                        <i class="fa-solid fa-print"></i> Cetak Langsung (A4)
+                    </button>
+                    <button onclick="downloadPDFDocument()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md transition">
+                        <i class="fa-solid fa-file-pdf"></i> Unduh PDF Dokumen
+                    </button>
+                </div>
+            </div>
+
+            <!-- PRINT CONTAINER PAPER A4 -->
+            <div id="printArea" class="a4-container bg-white text-slate-900 p-8 sm:p-12 mx-auto rounded-xl shadow-xl border border-slate-200 max-w-[210mm] min-h-[297mm] text-xs leading-relaxed space-y-6">
+                <!-- OFFICIAL KOP SURAT -->
+                <div class="border-b-4 border-double border-slate-900 pb-3 text-center relative flex items-center justify-between">
+                    <div class="w-16 h-16 flex items-center justify-center">
+                        <i class="fa-solid fa-kaaba text-4xl text-emerald-800"></i>
+                    </div>
+                    <div class="flex-grow text-center px-4">
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h4>
+                        <h3 class="font-black text-sm uppercase tracking-wide text-slate-900" id="printKankemenag">KANTOR KEMENTERIAN AGAMA KABUPATEN/KOTA</h3>
+                        <h2 class="font-black text-base uppercase tracking-wide text-emerald-900" id="printMadrasahHeader">SATUAN PENDIDIKAN MADRASAH</h2>
+                        <p class="text-[10px] text-slate-600 mt-0.5" id="printAlamatHeader">Alamat Lengkap Satuan Pendidikan Madrasah</p>
+                    </div>
+                    <div class="w-16 h-16 flex items-center justify-center">
+                        <i class="fa-solid fa-award text-4xl text-emerald-800"></i>
+                    </div>
+                </div>
+
+                <div class="text-center space-y-1">
+                    <h2 class="font-black text-sm text-slate-900 uppercase underline tracking-wider">LAPORAN HASIL PENILAIAN KINERJA KEPALA MADRASAH (PKKM)</h2>
+                    <p class="text-[11px] font-semibold text-slate-700" id="printPeriodeJudul">Jenis Penilaian: Tahunan | Tahun Pelajaran 2025/2026</p>
+                </div>
+
+                <!-- TABLE IDENTITAS -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-xs uppercase border-b pb-1 border-slate-400">I. IDENTITAS KEPALA MADRASAH & MADRASAH</h4>
+                    <table class="w-full text-xs">
+                        <tr>
+                            <td class="py-1 font-semibold w-36">1. Nama Kepala Madrasah</td>
+                            <td class="py-1 w-3">:</td>
+                            <td class="py-1 font-bold" id="printKamadNama">-</td>
+                            <td class="py-1 font-semibold w-32">5. Nama Madrasah</td>
+                            <td class="py-1 w-3">:</td>
+                            <td class="py-1 font-bold" id="printMadrasahNama">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">2. NIP / NPK</td>
+                            <td class="py-1">:</td>
+                            <td class="py-1" id="printKamadNip">-</td>
+                            <td class="py-1 font-semibold">6. NSM / NPSN</td>
+                            <td class="py-1">:</td>
+                            <td class="py-1" id="printMadrasahNsm">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">3. Pangkat / Golongan</td>
+                            <td class="py-1">:</td>
+                            <td class="py-1" id="printKamadGol">-</td>
+                            <td class="py-1 font-semibold">7. Status Madrasah</td>
+                            <td class="py-1">:</td>
+                            <td class="py-1" id="printMadrasahStatus">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">4. TMT Kepala Madrasah</td>
+                            <td class="py-1">:</td>
+                            <td class="py-1" id="printKamadTmt">-</td>
+                            <td class="py-1 font-semibold">8. Kabupaten / Prov</td>
+                            <td class="py-1">:</td>
+                            <td class="py-1" id="printMadrasahKabProv">-</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- TABLE REKAPITULASI CAPAIAN -->
+                <div class="space-y-2 avoid-break">
+                    <h4 class="font-bold text-xs uppercase border-b pb-1 border-slate-400">II. REKAPITULASI HASIL PENILAIAN KINERJA</h4>
+                    <table class="w-full text-xs border-collapse border border-slate-800 text-center">
+                        <thead>
+                            <tr class="bg-slate-100 font-bold uppercase text-[10px]">
+                                <th class="border border-slate-800 p-2 w-8">No</th>
+                                <th class="border border-slate-800 p-2 text-left">Tugas Utama / Komponen Penilaian</th>
+                                <th class="border border-slate-800 p-2 w-16">Jml Indikator</th>
+                                <th class="border border-slate-800 p-2 w-20">Skor Max</th>
+                                <th class="border border-slate-800 p-2 w-20">Skor Riil</th>
+                                <th class="border border-slate-800 p-2 w-20">Capaian (%)</th>
+                                <th class="border border-slate-800 p-2 w-24">Kategori</th>
+                            </tr>
+                        </thead>
+                        <tbody id="printTableRekapBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-bold bg-slate-50 text-xs">
+                                <td colspan="2" class="border border-slate-800 p-2 text-right">TOTAL NILAI KINERJA :</td>
+                                <td id="printTotalIndikatorCount" class="border border-slate-800 p-2">96</td>
+                                <td id="printTotalMaxScore" class="border border-slate-800 p-2">384</td>
+                                <td id="printTotalRiilScore" class="border border-slate-800 p-2">0</td>
+                                <td id="printTotalCapaianPercent" class="border border-slate-800 p-2 text-emerald-800">0.00%</td>
+                                <td id="printPredikatLabel" class="border border-slate-800 p-2 uppercase text-emerald-800">-</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- KRITERIA PREDIKAT KEMENAG -->
+                <div class="border p-2.5 rounded bg-slate-50 text-[10px] space-y-1 avoid-break">
+                    <span class="font-bold">Konversi Nilai Kinerja (SK Dirjen Pendis No. 1111/2019):</span>
+                    <div class="grid grid-cols-5 gap-1 text-center">
+                        <div><strong>Amat Baik (A):</strong> 91.00 – 100</div>
+                        <div><strong>Baik (B):</strong> 76.00 – 90.99</div>
+                        <div><strong>Cukup (C):</strong> 61.00 – 75.99</div>
+                        <div><strong>Sedang (D):</strong> 51.00 – 60.99</div>
+                        <div><strong>Kurang (E):</strong> &lt; 51.00</div>
+                    </div>
+                </div>
+
+                <!-- CATATAN & REKOMENDASI -->
+                <div class="space-y-2 avoid-break">
+                    <h4 class="font-bold text-xs uppercase border-b pb-1 border-slate-400">III. CATATAN & REKOMENDASI TIM PENILAI</h4>
+                    <div class="grid grid-cols-2 gap-3 text-[11px]">
+                        <div class="border p-2.5 rounded min-h-[90px] space-y-1">
+                            <span class="font-bold text-slate-800">Keunggulan & Prestasi:</span>
+                            <p id="printCatatanKelebihan" class="text-slate-700 whitespace-pre-wrap">-</p>
+                        </div>
+                        <div class="border p-2.5 rounded min-h-[90px] space-y-1">
+                            <span class="font-bold text-slate-800">Rekomendasi Tindak Lanjut:</span>
+                            <p id="printCatatanRekomendasi" class="text-slate-700 whitespace-pre-wrap">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TANDA TANGAN TIM PENILAI & KAMAD -->
+                <div class="space-y-4 pt-4 avoid-break">
+                    <div class="flex justify-between text-xs">
+                        <div></div>
+                        <p id="printTglLokasi" class="font-semibold">Malang, 28 Oktober 2026</p>
+                    </div>
+
+                    <div id="printSignaturesGrid" class="grid grid-cols-2 gap-y-6 gap-x-8 text-center text-[11px]">
+                        <!-- Dynamic signatures populated via JS -->
+                    </div>
+                </div>
+
+                <!-- PRINT FOOTER DEVKIT -->
+                <div class="border-t pt-3 text-center text-[10px] text-slate-400 font-mono">
+                    Developed by : D.E.A 2026 | System Informasi Penilaian Kinerja Kepala Madrasah (PKKM)
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER CREDIT MANDATORY -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-4 text-center text-xs no-print">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>Sistem Penilaian Kinerja Kepala Madrasah (PKKM) - Kemenag RI</p>
+            <p class="font-bold text-emerald-400">Developed by : D.E.A 2026</p>
+        </div>
+    </footer>
+
+    <!-- GENERIC MODAL FOR CONFIRMATIONS -->
+    <div id="customModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <h3 id="modalTitle" class="text-base font-bold text-slate-800 dark:text-white">Konfirmasi Action</h3>
+            <p id="modalBody" class="text-xs text-slate-600 dark:text-slate-300">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold">Batal</button>
+                <button id="modalConfirmBtn" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        /* ==========================================================================
+           INSTRUMENT DATA DEFINITION (SK DIRJEN PENDIS NO. 1111 TAHUN 2019)
+           ========================================================================== */
+        const INSTRUMEN_DATA = [
+            {
+                compNumber: 1,
+                title: "Usaha Pengembangan Madrasah",
+                code: "UPM",
+                unsurs: [
+                    {
+                        code: "1.1",
+                        title: "Mengembangkan madrasah sesuai dengan kebutuhan",
+                        indicators: [
+                            { id: "1.1.1", text: "Mampu mengembangkan struktur organisasi yang sesuai dengan kebutuhan program.", evidence: "Bagan/struktur organisasi, Notulen rapat keputusan penyusunan struktur, Dokumen sosialisasi.", isDigital: false, isKewirausahaan: false },
+                            { id: "1.1.2", text: "Mampu menempatkan personalia yang sesuai dengan kebutuhan.", evidence: "Dokumen penetapan/pengesahan susunan organisasi, Rincian tugas personil, SOP personalia.", isDigital: false, isKewirausahaan: false },
+                            { id: "1.1.3", text: "Mampu mengembangkan pedoman dan prosedur kerja organisasi madrasah.", evidence: "Dokumen SOP madrasah, Pedoman Sistem Informasi Madrasah.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "1.2",
+                        title: "Mengelola perubahan dan pengembangan madrasah menuju organisasi pembelajar yang efektif",
+                        indicators: [
+                            { id: "1.2.1", text: "Mampu mengembangkan program baru untuk meningkatkan pencapaian target yang lebih tinggi.", evidence: "Visi dan Misi madrasah, Data prestasi madrasah, Data hasil UN/AKMI 3 tahun, RKJM.", isDigital: false, isKewirausahaan: true },
+                            { id: "1.2.2", text: "Mampu dan terampil dalam membangun tim kerja yang efektif untuk mendapatkan produk kinerja unggul.", evidence: "Bagan struktur organisasi, SK Tugas dan Fungsi, Pedoman Monev, Pedoman Reward & Punishment.", isDigital: false, isKewirausahaan: false },
+                            { id: "1.2.3", text: "Mampu menerapkan berbagai teknik pembaharuan dalam pengelolaan pembelajaran.", evidence: "Kurikulum, Kalender Pendidikan, Perangkat Pembelajaran, Peraturan Akademik, Notulen Evaluasi.", isDigital: true, isKewirausahaan: true },
+                            { id: "1.2.4", text: "Mampu mengembangkan potensi dan meningkatkan prestasi madrasah.", evidence: "Data prestasi madrasah 1 tahun terakhir, Dokumen Akreditasi, Program Ekstrakurikuler, Program Unggulan.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "1.3",
+                        title: "Mengelola hubungan antara madrasah dan masyarakat",
+                        indicators: [
+                            { id: "1.3.1", text: "Merencanakan kerjasama dengan lembaga pemerintah, swasta, dan masyarakat.", evidence: "SK Komite, AD/ART Komite, Program Kerja Komite, MoU Kerjasama, Sertifikat/Plakat.", isDigital: false, isKewirausahaan: true },
+                            { id: "1.3.2", text: "Melakukan pendekatan-pendekatan dalam rangka mendapatkan dukungan.", evidence: "Program kegiatan kerjasama, Foto kegiatan, Jadwal & Laporan Kegiatan.", isDigital: false, isKewirausahaan: false },
+                            { id: "1.3.3", text: "Memanfaatkan dan memelihara hubungan kerjasama dengan pihak luar.", evidence: "Laporan kegiatan kerjasama, Laporan monitoring/evaluasi kerjasama, Dokumentasi foto/video.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "1.4",
+                        title: "Mengelola proses pencapaian SNP sesuai arah dan tujuan pendidikan nasional",
+                        indicators: [
+                            { id: "1.4.1", text: "Mengaplikasikan pengembangan kurikulum yang mengacu kepada standar isi.", evidence: "Dokumen Kurikulum, Kalender pendidikan, Perangkat pembelajaran, Pedoman penilaian, Buku kerja guru.", isDigital: false, isKewirausahaan: false },
+                            { id: "1.4.2", text: "Mengaplikasikan pengembangan proses pembelajaran yang mengacu standar proses.", evidence: "Silabus, RPP, Struktur kurikulum, Jadwal mengajar, Jurnal guru, Dokumen supervisi.", isDigital: true, isKewirausahaan: false },
+                            { id: "1.4.3", text: "Mengaplikasikan sistem penilaian pembelajaran mengacu standar penilaian.", evidence: "Instrumen penilaian, Kisi-kisi soal, Kumpulan naskah soal, Analisis butir soal, Raport/E-Rapor.", isDigital: true, isKewirausahaan: false },
+                            { id: "1.4.4", text: "Melaksanakan penjaminan mutu pencapaian standar kompetensi lulusan.", evidence: "Program kesiswaan, Laporan kegiatan kesiswaan, Dokumen literasi, Data prestasi akademik/non-akademik.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "1.5",
+                        title: "Mengelola unit layanan khusus madrasah dalam mendukung pembelajaran",
+                        indicators: [
+                            { id: "1.5.1", text: "Mampu mengelola laboratorium madrasah agar dimanfaatkan secara optimal.", evidence: "Jurnal & Laporan pengelolaan lab, Jadwal penggunaan lab, Program kerja laboratorium.", isDigital: false, isKewirausahaan: false },
+                            { id: "1.5.2", text: "Mampu mengelola perpustakaan madrasah dalam menyiapkan sumber belajar.", evidence: "Daftar buku induk perpustakaan, Laporan pengelolaan, Program kerja perpustakaan.", isDigital: true, isKewirausahaan: false },
+                            { id: "1.5.3", text: "Mampu mengelola usaha madrasah untuk pembelajaran dan tambahan dana.", evidence: "Data/Laporan kegiatan usaha madrasah, Dokumentasi foto/video kegiatan unit usaha.", isDigital: false, isKewirausahaan: true },
+                            { id: "1.5.4", text: "Mampu mengelola koperasi madrasah baik sebagai media praktik maupun sumber belajar.", evidence: "Instrumen hasil praktek, Foto kegiatan, AD/ART Koperasi, Laporan RAT Koperasi.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "1.6",
+                        title: "Mengelola sistem informasi madrasah (SIM) dalam mendukung pengambilan keputusan",
+                        indicators: [
+                            { id: "1.6.1", text: "Memanfaatkan teknologi informasi dan komunikasi dalam manajemen madrasah.", evidence: "Fasilitas TIK, Website madrasah, Pedoman Sistem Informasi Madrasah (SIMPATIKA/EMIS).", isDigital: true, isKewirausahaan: false },
+                            { id: "1.6.2", text: "Memanfaatkan TIK dalam pembelajaran sebagai sumber dan media pembelajaran.", evidence: "Ketersediaan komputer, Jaringan internet/WiFi, Website, Email madrasah, LMS.", isDigital: true, isKewirausahaan: false },
+                            { id: "1.6.3", text: "Memanfaatkan TIK dalam menjalin kerjasama dengan pihak lain.", evidence: "Pengelolaan SIM, Fasilitas SIM, Surat tugas pengelola SIM, Pelaporan data online.", isDigital: true, isKewirausahaan: false },
+                            { id: "1.6.4", text: "Memanfaatkan TIK dalam promosi program madrasah dan prestasi.", evidence: "Media sosial resmi madrasah, Channel Youtube, Website, Brosur Digital PPDB.", isDigital: true, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "1.7",
+                        title: "Memanfaatkan kemajuan teknologi informasi bagi peningkatan pembelajaran dan manajemen",
+                        indicators: [
+                            { id: "1.7.1", text: "Mengembangkan sistem administrasi pengelolaan berbasis TIK secara efektif.", evidence: "Jaringan intranet/internet, Website, Email madrasah, Absensi elektronik, E-RKAM.", isDigital: true, isKewirausahaan: false },
+                            { id: "1.7.2", text: "Mengelola administrasi pembelajaran berbasis TIK (E-Learning / LMS).", evidence: "Pemanfaatan TIK untuk pembelajaran (Google Classroom/E-Learning Kemenag/Madrasah Digital).", isDigital: true, isKewirausahaan: false },
+                            { id: "1.7.3", text: "Mengembangkan sistem pengelolaan perpustakaan digital (E-Library).", evidence: "Katalog digital, BSE, Akses internet perpustakaan, Dokumen aplikasi layanan perpustakaan.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    }
+                ]
+            },
+            {
+                compNumber: 2,
+                title: "Pelaksanaan Tugas Manajerial",
+                code: "MANAJERIAL",
+                unsurs: [
+                    {
+                        code: "2.1",
+                        title: "Menyusun perencanaan madrasah untuk berbagai tingkat perencanaan",
+                        indicators: [
+                            { id: "2.1.1", text: "Mampu mengembangkan RKJM, RKT/RKAM berdasarkan data Evaluasi Diri Madrasah (EDM).", evidence: "Dokumen EDM (Evaluasi Diri Madrasah), Dokumen RKJM dan RKT/RKAM berbasis EDM.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.1.2", text: "Mampu merumuskan visi-misi sebagai arah pengembangan program.", evidence: "Rumusan Visi-Misi, Berita acara dan daftar hadir perumusan/peninjauan visi misi.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.1.3", text: "Mampu menentukan strategi pencapaian tujuan madrasah yang terukur.", evidence: "Dokumen Program Kerja RKJM dan RKTM.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.1.4", text: "Mampu menyusun program dengan rencana evaluasi keterlaksanaan.", evidence: "Dokumen rencana evaluasi keterlaksanaan dan pencapaian program dalam RKJM/RKTM.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "2.2",
+                        title: "Memimpin madrasah dalam rangka pendayagunaan sumber daya secara optimal",
+                        indicators: [
+                            { id: "2.2.1", text: "Mampu memberi contoh disiplin; hadir tepat waktu dan mengakhiri pekerjaan.", evidence: "Daftar hadir elektronik Kamad, Daftar hadir kegiatan madrasah.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.2.2", text: "Mampu melaksanakan peraturan sesuai dengan ketentuan yang berlaku.", evidence: "Laporan kehadiran, Notulen rapat pengarahan, Dokumen Monev.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.2.3", text: "Mampu menunjukkan keteladanan dalam memanfaatkan sumber daya secara efektif dan efisien.", evidence: "Dokumen monitoring dan evaluasi pemanfaatan sumber belajar, Notulen rapat.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.2.4", text: "Mampu menunjukkan kedisiplinan sebagai insan pembelajar.", evidence: "Koleksi buku referensi, Karya tulis ilmiah Kamad, Blog pribadi/tulisan publikasi.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "2.3",
+                        title: "Menciptakan budaya dan iklim madrasah yang kondusif dan inovatif",
+                        indicators: [
+                            { id: "2.3.1", text: "Mampu menjadi contoh dan berbudaya mutu yang kompetitif dalam prestasi.", evidence: "Dokumen peningkatan KKM, Target hasil ujian, Data prestasi akademik/non-akademik.", isDigital: false, isKewirausahaan: true },
+                            { id: "2.3.2", text: "Mampu melengkapi sarana prasarana untuk suasana belajar kondusif.", evidence: "Foto/Observasi lingkungan madrasah yang asri, bersih, aman, dan menyenangkan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.3.3", text: "Mampu memfasilitasi kegiatan untuk meningkatkan budaya baca dan tulis (literasi).", evidence: "Laporan kegiatan literasi, Pajangan karya tulis siswa, Data kunjungan perpustakaan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.3.4", text: "Mampu memfasilitasi kegiatan lomba akademik dan non-akademik bagi peserta didik.", evidence: "Dokumen penyelenggaraan kompetensi/lomba, Piagam penghargaan, Piala, Trofi.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "2.4",
+                        title: "Mengelola guru dan staf dalam rangka pendayagunaan SDM secara optimal",
+                        indicators: [
+                            { id: "2.4.1", text: "Mampu menyusun perencanaan pengembangan pendidik dan tenaga kependidikan.", evidence: "Program kerja pembinaan guru/staf, Laporan pelatihan/workshop guru.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.4.2", text: "Mampu melakukan pembinaan berkala untuk meningkatkan mutu SDM.", evidence: "Buku/Catatan pembinaan guru dan tendik, Notulen dan daftar hadir rapat pembinaan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.4.3", text: "Memfasilitasi guru dan staf untuk meningkatkan mutu profesi (PKB/MGMP).", evidence: "Data keikutsertaan guru di MGMP/KKG, Sertifikat diklat/seminar guru.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.4.4", text: "Memantau dan menilai penerapan hasil pelatihan dalam pekerjaan di madrasah.", evidence: "Program evaluasi pelatihan, Laporan tindak lanjut penerapan diklat.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "2.5",
+                        title: "Mengelola sarana dan prasarana madrasah secara optimal",
+                        indicators: [
+                            { id: "2.5.1", text: "Mampu mengelola fasilitas prasarana, perabot, dan sarana gedung madrasah.", evidence: "Buku Inventaris Sarpras, Buku pemeliharaan sarana dan prasarana.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.5.2", text: "Mampu mengelola perpustakaan madrasah dengan baik.", evidence: "Buku induk perpustakaan, Grafis/data layanan perpustakaan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.5.3", text: "Mampu mengelola laboratorium madrasah dengan baik.", evidence: "Daftar inventaris laboratorium, Jurnal penggunaan laboratorium.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.5.4", text: "Mampu mengelola fasilitas penunjang (bengkel, toko, koperasi, kebun, dll).", evidence: "Data fasilitas penunjang wirausaha yang dikelola madrasah.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "2.6",
+                        title: "Mengelola peserta didik dalam penerimaan, penempatan, dan pengembangan kapasitas",
+                        indicators: [
+                            { id: "2.6.1", text: "Menyusun perencanaan PPDB, kriteria penerimaan, dan analisis bekal ajar.", evidence: "Program PPDB Online/Offline, Brosur, Data hasil tes/psikotes peserta didik baru.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.6.2", text: "Memiliki program pengembangan potensi diri dan prestasi peserta didik.", evidence: "Program pengembangan diri/ekstrakurikuler, Laporan prestasi kesiswaan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.6.3", text: "Memfasilitasi kegiatan peningkatan pembiasaan dan penanaman nilai-nilai karakter.", evidence: "Program dan laporan pembiasaan sholat berjamaah, tazkiyatun nafs, kedisiplinan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.6.4", text: "Memfasilitasi pengembangan diri bagi siswa, guru, dan tendik secara optimal.", evidence: "Data prestasi siswa, guru, dan tendik di berbagai ajang kompetisi.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "2.7",
+                        title: "Mengelola pengembangan kurikulum dan kegiatan pembelajaran",
+                        indicators: [
+                            { id: "2.7.1", text: "Mampu mengarahkan pengembangan kurikulum melalui IHT, Workshop, Rapat Kerja.", evidence: "Dokumen Kurikulum (KMA 347 / Kurikulum Merdeka/2013), SK Tim Pengembang, SK Pembagian Tugas.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.7.2", text: "Mampu mengendalikan pelaksanaan kurikulum berlandaskan kalender pendidikan.", evidence: "Struktur kurikulum, Jadwal pelajaran, Daftar hadir guru, Peraturan akademik.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.7.3", text: "Memfasilitasi efektivitas tim kerja guru (MGMP/KKG Intern) dalam meningkatkan mutu.", evidence: "Program & Laporan kegiatan KKG/MGMP tingkat madrasah, Foto/video kegiatan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.7.4", text: "Mampu mengembangkan pelayanan belajar inovatif melalui perangkat terbarukan.", evidence: "Ragam metode, RPP/Modul Ajar inovatif, Pemanfaatan media TIK & alat peraga.", isDigital: true, isKewirausahaan: true },
+                            { id: "2.7.5", text: "Memfasilitasi peserta didik dalam mengembangkan kolaborasi dan kompetisi.", evidence: "Program & Laporan kegiatan kolaborasi/kompetisi kesiswaan.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "2.8",
+                        title: "Mengelola keuangan madrasah secara akuntabel, transparan, dan efisien",
+                        indicators: [
+                            { id: "2.8.1", text: "Mampu merencanakan kebutuhan keuangan sesuai RKJM/RKAM.", evidence: "Dokumen RKJM, RKT, RKAM berbasis aplikasi E-RKAM.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.8.2", text: "Mampu mengupayakan sumber keuangan tambahan terutama dari unit usaha/masyarakat.", evidence: "Laporan keuangan sumber dana swadaya, unit usaha, atau donatur.", isDigital: false, isKewirausahaan: true },
+                            { id: "2.8.3", text: "Mampu mengkoordinasikan pembelanjaan keuangan sesuai asas prioritas.", evidence: "Laporan realisasi anggaran, Laporan pertanggungjawaban (LPJ) keuangan.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.8.4", text: "Mampu membuat laporan dan evaluasi pengelolaan keuangan yang transparan.", evidence: "Laporan keuangan, Buku Kas Umum (BKU), Publikasi transparansi anggaran.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "2.9",
+                        title: "Mengelola ketatausahaan madrasah dalam mendukung pencapaian tujuan",
+                        indicators: [
+                            { id: "2.9.1", text: "Mampu mengelola administrasi surat masuk dan keluar sesuai pedoman persuratan.", evidence: "Buku agenda surat masuk/keluar, Aplikasi Srikandi/Persuratan Digital.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.9.2", text: "Mampu mengelola administrasi akademik, kesiswaan, sarpras, keuangan, dan humas.", evidence: "Dokumen administrasi madrasah terarsip rapi.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.9.3", text: "Mampu mengelola administrasi kearsipan madrasah baik dinamis maupun statis.", evidence: "Arsip fisik dan digital dokumen madrasah.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.9.4", text: "Mampu mengelola administrasi akreditasi madrasah.", evidence: "Dokumen pemenuhan 4 komponen akreditasi (IASP).", isDigital: true, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "2.10",
+                        title: "Monitoring, evaluasi, dan pelaporan pelaksanaan program kegiatan",
+                        indicators: [
+                            { id: "2.10.1", text: "Menyusun standar kinerja program pendidikan yang dapat diukur (SKP).", evidence: "Dokumen SKP Kepala Madrasah dan Guru.", isDigital: true, isKewirausahaan: false },
+                            { id: "2.10.2", text: "Melakukan monitoring dan evaluasi kinerja program pendidikan.", evidence: "Dokumen instrumen monev program madrasah.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.10.3", text: "Menyusun laporan evaluasi pelaksanaan program.", evidence: "Dokumen Laporan Monev tahunan.", isDigital: false, isKewirausahaan: false },
+                            { id: "2.10.4", text: "Merumuskan program tindak lanjut berdasarkan hasil evaluasi program sebelumnya.", evidence: "Dokumen Program Tindak Lanjut hasil monev.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    }
+                ]
+            },
+            {
+                compNumber: 3,
+                title: "Pengembangan Kewirausahaan",
+                code: "KWU",
+                unsurs: [
+                    {
+                        code: "3.1",
+                        title: "Menciptakan inovasi yang bermanfaat dan tepat bagi pengembangan madrasah",
+                        indicators: [
+                            { id: "3.1.1", text: "Memahami dan menghayati arti dan tujuan perubahan (inovasi) madrasah.", evidence: "Dokumen Program Pengembangan Kewirausahaan, Laporan Inovasi.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.1.2", text: "Menggunakan metode, teknik, dan proses perubahan madrasah.", evidence: "Bukti penerapan hasil inovasi dan kreativitas di madrasah.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.1.3", text: "Menumbuhkan iklim yang mendorong kebebasan berpikir kreatif dan inovatif.", evidence: "Data jenis usaha produktif madrasah, Program pendayagunaan hasil usaha.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.1.4", text: "Mendorong warga madrasah untuk melakukan prakarsa dan keberanian moral baru.", evidence: "Dokumen karya inovatif warga madrasah.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "3.2",
+                        title: "Bekerja keras untuk mencapai keberhasilan madrasah sebagai organisasi pembelajar",
+                        indicators: [
+                            { id: "3.2.1", text: "Mampu bertindak kreatif dan inovatif dalam pekerjaan.", evidence: "RPP/Modul yang memuat keterampilan berpikir kritis dan kreatif, Produk siswa.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.2.2", text: "Mampu memberdayakan potensi madrasah secara optimal kedalam kegiatan produktif.", evidence: "Dokumen Rencana Pengembangan Madrasah (RPM), Laporan unit produksi.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.2.3", text: "Mampu menumbuhkan jiwa kewirausahaan (kreatif, inovatif, produktif) di kalangan warga.", evidence: "Bazar kewirausahaan, Kantin kejujuran, Koperasi, Unit Jasa.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.2.4", text: "Mampu mencatat ide-ide baru kemudian mengembangakannya.", evidence: "Catatan jurnal inovasi Kamad & Dokumen Program Kerja.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "3.3",
+                        title: "Memiliki motivasi yang kuat untuk sukses dalam melaksanakan tugas pokok dan fungsi",
+                        indicators: [
+                            { id: "3.3.1", text: "Bersedia belajar dari orang lain dan lembaga mitra.", evidence: "Forum komunikasi dengan lembaga lain, Foto Studi Tiru/Banding.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.3.2", text: "Ingin selalu melakukan yang terbaik dalam kepemimpinan.", evidence: "Sertifikat penghargaan lomba manajemen/pembelajaran.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.3.3", text: "Menciptakan perubahan yang kuat di lingkungan madrasah.", evidence: "Dokumen Program Inovasi Madrasah / RPM.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "3.4",
+                        title: "Pantang menyerah dan selalu mencari solusi terbaik dalam menghadapi kendala",
+                        indicators: [
+                            { id: "3.4.1", text: "Mampu melibatkan tokoh agama, masyarakat, dan pemerintah dalam memecahkan masalah.", evidence: "MoU/Kerjasama dengan stakeholder & Foto kegiatan kemitraan.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.4.2", text: "Mampu bersikap objektif dan tidak memihak dalam mengatasi konflik internal.", evidence: "Dokumen penanganan kasus/konflik internal madrasah.", isDigital: false, isKewirausahaan: false },
+                            { id: "3.4.3", text: "Mampu bersikap simpatik dan tenggang rasa terhadap orang lain.", evidence: "Dokumen kegiatan sosial dan empati kemanusiaan di madrasah.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "3.5",
+                        title: "Memiliki naluri kewirausahaan dalam mengelola kegiatan produksi/jasa madrasah",
+                        indicators: [
+                            { id: "3.5.1", text: "Mampu merencanakan kegiatan produksi/jasa sesuai potensi madrasah.", evidence: "Dokumen Perencanaan Usaha/Produksi/Jasa Madrasah.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.5.2", text: "Mampu membina kegiatan produksi/jasa secara profesional dan akuntabel.", evidence: "Laporan pelaksanaan dan hasil program unit produksi kewirausahaan.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.5.3", text: "Mampu mengelola usaha madrasah untuk pembelajaran dan tambahan pemasukan.", evidence: "Laporan keuangan dan omset usaha madrasah.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.5.4", text: "Mampu melaksanakan pengawasan kegiatan produksi/jasa dan menyusun laporan.", evidence: "Laporan evaluasi program unit produksi & kewirausahaan.", isDigital: false, isKewirausahaan: true },
+                            { id: "3.5.5", text: "Mampu mengembangkan kegiatan produksi/jasa dan pemasarannya.", evidence: "Media pemasaran produk/jasa madrasah (Brosur, Online shop, Media Sosial).", isDigital: true, isKewirausahaan: true }
+                        ]
+                    }
+                ]
+            },
+            {
+                compNumber: 4,
+                title: "Supervisi kepada Guru dan Tenaga Kependidikan",
+                code: "SUPERVISI",
+                unsurs: [
+                    {
+                        code: "4.1",
+                        title: "Menyusun program supervisi akademik dalam rangka peningkatan profesionalisme",
+                        indicators: [
+                            { id: "4.1.1", text: "Mengidentifikasi masalah yang guru hadapi dalam pelaksanaan pembelajaran.", evidence: "Dokumen Program Supervisi Pembelajaran & SK Tim Supervisor.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.1.2", text: "Mampu merumuskan tujuan yang dilengkapi dengan target pencapaian yang terukur.", evidence: "Jadwal supervisi & Target pencapaian supervisi terukur.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.1.3", text: "Mampu mengembangkan instrumen supervisi yang relevan.", evidence: "Instrumen Supervisi Perangkat, Proses, dan Penilaian Pembelajaran.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "4.2",
+                        title: "Melaksanakan supervisi akademik terhadap guru dengan pendekatan dan teknik yang tepat",
+                        indicators: [
+                            { id: "4.2.1", text: "Mengadakan pertemuan awal untuk menjaring data rencana pembelajaran.", evidence: "Dokumen Pra-Observasi Supervisi Akademik.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.2.2", text: "Melaksanakan pemantaun pembelajaran dan membuat catatan objektif.", evidence: "Instrumen dan Laporan Hasil Observasi Pembelajaran Kelas.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.2.3", text: "Melakukan pertemuan refleksi, menganalisis catatan, dan menyimpulkan hasil observasi.", evidence: "Dokumen Analisis dan Catatan Refleksi Pasca-Supervisi.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.2.4", text: "Bersama guru menyusun rekomendasi tindak lanjut perbaikan.", evidence: "Program remedial, pengayaan, dan rekomendasi workshop guru.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "4.3",
+                        title: "Menilai dan menindaklanjuti kegiatan supervisi akademik",
+                        indicators: [
+                            { id: "4.3.1", text: "Memfasilitasi guru dalam merencanakan tindak lanjut perbaikan sistem penilaian.", evidence: "Hasil analisis butir soal dan tindak lanjut perbaikan penilaian.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.3.2", text: "Mengecek ulang keterlaksanaan rekomendasi oleh guru secara berkala.", evidence: "Dokumen verifikasi keterlaksanaan rekomendasi supervisi.", isDigital: false, isKewirausahaan: false },
+                            { id: "4.3.3", text: "Melaksanakan pembinaan dan pengembangan guru sebagai tindak lanjut supervisi.", evidence: "Laporan Tindak Lanjut Supervisi & Kegiatan PKB Guru.", isDigital: true, isKewirausahaan: false }
+                        ]
+                    }
+                ]
+            },
+            {
+                compNumber: 5,
+                title: "Hasil Kinerja Kepala Madrasah (Khusus 4-Tahunan)",
+                code: "HASIL_4THN",
+                unsurs: [
+                    {
+                        code: "5.1",
+                        title: "Prestasi Peserta Didik",
+                        indicators: [
+                            { id: "5.1.1", text: "Prestasi akademik peserta didik pada tingkat Kabupaten/Provinsi/Nasional.", evidence: "Piagam, Medali, Sertifikat Juara Lomba Akademik Siswa (KSM, OSN, dll).", isDigital: false, isKewirausahaan: false },
+                            { id: "5.1.2", text: "Prestasi non-akademik peserta didik pada berbagai tingkat.", evidence: "Piagam, Piala Juara Lomba Olahraga, Seni, Pramuka, Robotik, dll.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "5.2",
+                        title: "Prestasi Pendidik dan Tenaga Kependidikan",
+                        indicators: [
+                            { id: "5.2.1", text: "Prestasi akademik pendidik dan tenaga kependidikan.", evidence: "Piagam/Sertifikat Guru Berprestasi, Anugerah GTK Kemenag, Karya Inovatif.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.2.2", text: "Prestasi non-akademik pendidik dan tenaga kependidikan.", evidence: "Piagam/Piala kejuaraan non-akademik GTK.", isDigital: false, isKewirausahaan: false }
+                        ]
+                    },
+                    {
+                        code: "5.3",
+                        title: "Prestasi Kelembagaan Madrasah",
+                        indicators: [
+                            { id: "5.3.1", text: "Kelebihan/keunggulan prestasi akademik madrasah dari sekolah lain.", evidence: "Sertifikat Akreditasi A, Madrasah Unggulan, Rata-rata nilai ujian tinggi.", isDigital: false, isKewirausahaan: true },
+                            { id: "5.3.2", text: "Kelebihan prestasi non-akademik madrasah dari sekolah lain.", evidence: "Penghargaan Madrasah Adiwiyata, Madrasah Ramah Anak, Madrasah Digital.", isDigital: true, isKewirausahaan: true }
+                        ]
+                    },
+                    {
+                        code: "5.4",
+                        title: "Prestasi Kepala Madrasah",
+                        indicators: [
+                            { id: "5.4.1", text: "Ijazah dan kualifikasi akademik yang dimiliki kepala madrasah.", evidence: "Dokumen Ijazah S1/S2/S3 Kepala Madrasah.", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.2", text: "Pendidikan dan pelatihan (diklat) yang pernah diikuti kepala madrasah.", evidence: "Sertifikat Diklat Teknis/Fungsional Kepemimpinan Kepala Madrasah.", isDigital: true, isKewirausahaan: false },
+                            { id: "5.4.3", text: "Penguasaan ICT (Teknologi Informasi & Komunikasi) kepala madrasah.", evidence: "Praktik langsung penguasaan laptop, aplikasi SIM, email, presentasi digital.", isDigital: true, isKewirausahaan: false },
+                            { id: "5.4.4", text: "Prestasi akademik maupun non-akademik yang diraih oleh kepala madrasah.", evidence: "Piagam, Medali, Penghargaan Kepala Madrasah Berprestasi.", isDigital: false, isKewirausahaan: true },
+                            { id: "5.4.5", text: "Kegiatan penelitian kependidikan (PTS/PTK) yang telah dilakukan kepala madrasah.", evidence: "Laporan Karya Tulis Ilmiah / Penelitian Tindakan Sekolah (PTS).", isDigital: false, isKewirausahaan: false },
+                            { id: "5.4.6", text: "Pelibatan masyarakat dan komite madrasah dalam mendukung program.", evidence: "Dokumen rapat komite, Laporan bantuan/partisipasi masyarakat.", isDigital: false, isKewirausahaan: true },
+                            { id: "5.4.7", text: "Kegiatan kemitraan dengan stakeholder pendidikan dalam meningkatkan kompetensi.", evidence: "Dokumen Perjanjian Kerjasama (MoU) Kemitraan.", isDigital: false, isKewirausahaan: true }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        /* ==========================================================================
+           GLOBAL APP STATE & INITIALIZATION
+           ========================================================================== */
+        let appState = {
+            identitas: {
+                jenisPenilaian: 'tahunan',
+                tahunKe: 'Tahun Ke-1',
+                tahunPelajaran: '2025/2026',
+                tglPenilaian: new Date().toISOString().split('T')[0],
+                kamadNama: '',
+                kamadNip: '',
+                kamadGolongan: '',
+                kamadTmt: '',
+                kamadPendidikan: '',
+                madrasahNama: '',
+                madrasahNsm: '',
+                madrasahStatus: 'Negeri',
+                madrasahAlamat: '',
+                madrasahKabupaten: '',
+                madrasahProvinsi: '',
+                penilai1: { active: true, nama: '', nip: '' },
+                penilai2: { active: true, nama: '', nip: '' },
+                penilai3: { active: false, nama: '', nip: '' },
+                penilai4: { active: false, nama: '', nip: '' },
+                catatanKelebihan: '',
+                catatanRekomendasi: ''
+            },
+            scores: {}, // Key: indicatorId -> { score: 1-4, note: '', link: '' }
+            activeComponentFilter: 1,
+            focusFilter: null // 'digital' or 'kewirausahaan' or null
+        };
+
+        let radarChartInstance = null;
+
+        window.onload = function() {
+            loadStateFromLocalStorage();
+            initFormValues();
+            renderIndicators();
+            updateAllCalculations();
+            initChart();
+        };
+
+        function saveStateToLocalStorage() {
+            localStorage.setItem('PKKM_2026_DATA', JSON.stringify(appState));
+            updateNavBadges();
+        }
+
+        function loadStateFromLocalStorage() {
+            const saved = localStorage.getItem('PKKM_2026_DATA');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appState = { ...appState, ...parsed };
+                } catch(e) {
+                    console.error("Failed loading saved state:", e);
+                }
+            }
+        }
+
+        function initFormValues() {
+            const id = appState.identitas;
+            document.getElementById('jenisPenilaian').value = id.jenisPenilaian || 'tahunan';
+            document.getElementById('tahunKe').value = id.tahunKe || 'Tahun Ke-1';
+            document.getElementById('tahunPelajaran').value = id.tahunPelajaran || '2025/2026';
+            document.getElementById('tglPenilaian').value = id.tglPenilaian || new Date().toISOString().split('T')[0];
+
+            document.getElementById('kamadNama').value = id.kamadNama || '';
+            document.getElementById('kamadNip').value = id.kamadNip || '';
+            document.getElementById('kamadGolongan').value = id.kamadGolongan || '';
+            document.getElementById('kamadTmt').value = id.kamadTmt || '';
+            document.getElementById('kamadPendidikan').value = id.kamadPendidikan || '';
+
+            document.getElementById('madrasahNama').value = id.madrasahNama || '';
+            document.getElementById('madrasahNsm').value = id.madrasahNsm || '';
+            document.getElementById('madrasahStatus').value = id.madrasahStatus || 'Negeri';
+            document.getElementById('madrasahAlamat').value = id.madrasahAlamat || '';
+            document.getElementById('madrasahKabupaten').value = id.madrasahKabupaten || '';
+            document.getElementById('madrasahProvinsi').value = id.madrasahProvinsi || '';
+
+            document.getElementById('penilai1_active').checked = id.penilai1?.active ?? true;
+            document.getElementById('penilai1_nama').value = id.penilai1?.nama || '';
+            document.getElementById('penilai1_nip').value = id.penilai1?.nip || '';
+
+            document.getElementById('penilai2_active').checked = id.penilai2?.active ?? true;
+            document.getElementById('penilai2_nama').value = id.penilai2?.nama || '';
+            document.getElementById('penilai2_nip').value = id.penilai2?.nip || '';
+
+            document.getElementById('penilai3_active').checked = id.penilai3?.active ?? false;
+            document.getElementById('penilai3_nama').value = id.penilai3?.nama || '';
+            document.getElementById('penilai3_nip').value = id.penilai3?.nip || '';
+
+            document.getElementById('penilai4_active').checked = id.penilai4?.active ?? false;
+            document.getElementById('penilai4_nama').value = id.penilai4?.nama || '';
+            document.getElementById('penilai4_nip').value = id.penilai4?.nip || '';
+
+            document.getElementById('catatanKelebihan').value = id.catatanKelebihan || '';
+            document.getElementById('catatanRekomendasi').value = id.catatanRekomendasi || '';
+
+            handleJenisPenilaianChange(false);
+        }
+
+        /* ==========================================================================
+           TAB & FILTER SWITCHING LOGIC
+           ========================================================================== */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'bg-emerald-700', 'text-white', 'font-semibold');
+                btn.classList.add('text-emerald-200');
+            });
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('active-tab', 'bg-emerald-700', 'text-white', 'font-semibold');
+                activeBtn.classList.remove('text-emerald-200');
+            }
+
+            if (tabId === 'tab-rekapitulasi') {
+                updateRekapitulasiView();
+                updateChart();
+            } else if (tabId === 'tab-cetak') {
+                saveIdentitasFromUI();
+                updatePrintView();
+            }
+        }
+
+        function handleJenisPenilaianChange(shouldRender = true) {
+            const val = document.getElementById('jenisPenilaian').value;
+            appState.identitas.jenisPenilaian = val;
+
+            const btn5 = document.getElementById('comp-btn-5');
+            if (val === '4tahunan') {
+                btn5.classList.remove('hidden');
+            } else {
+                btn5.classList.add('hidden');
+                if (appState.activeComponentFilter === 5) {
+                    appState.activeComponentFilter = 1;
+                }
+            }
+
+            if (shouldRender) {
+                saveStateToLocalStorage();
+                renderIndicators();
+                updateAllCalculations();
+            }
+        }
+
+        function filterComponent(compNum) {
+            appState.activeComponentFilter = compNum;
+            document.querySelectorAll('.comp-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-700', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-700', 'dark:bg-slate-700', 'dark:text-slate-300');
+            });
+
+            const activeBtn = document.getElementById(`comp-btn-${compNum}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-emerald-700', 'text-white');
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-700', 'dark:bg-slate-700', 'dark:text-slate-300');
+            }
+
+            renderIndicators();
+        }
+
+        function toggleFilterFocus(type) {
+            if (appState.focusFilter === type) {
+                appState.focusFilter = null;
+            } else {
+                appState.focusFilter = type;
+            }
+
+            const btnDig = document.getElementById('btnFilterDigital');
+            const btnKwu = document.getElementById('btnFilterKewirausahaan');
+
+            btnDig.className = "px-2.5 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1 transition " +
+                (appState.focusFilter === 'digital' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200');
+
+            btnKwu.className = "px-2.5 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1 transition " +
+                (appState.focusFilter === 'kewirausahaan' ? 'bg-amber-500 text-white border-amber-500' : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200');
+
+            renderIndicators();
+        }
+
+        /* ==========================================================================
+           RENDER INSTRUMENT INDICATORS
+           ========================================================================== */
+        function renderIndicators() {
+            const container = document.getElementById('indicatorsContainer');
+            container.innerHTML = '';
+
+            const currentComp = INSTRUMEN_DATA.find(c => c.compNumber === appState.activeComponentFilter);
+            if (!currentComp) return;
+
+            document.getElementById('activeCompTitle').innerText = `Komponen ${currentComp.compNumber}: ${currentComp.title}`;
+
+            let compTotalCount = 0;
+            let compFilledCount = 0;
+            let compScoreSum = 0;
+
+            currentComp.unsurs.forEach(unsur => {
+                let filteredIndicators = unsur.indicators;
+                if (appState.focusFilter === 'digital') {
+                    filteredIndicators = filteredIndicators.filter(i => i.isDigital);
+                } else if (appState.focusFilter === 'kewirausahaan') {
+                    filteredIndicators = filteredIndicators.filter(i => i.isKewirausahaan);
+                }
+
+                if (filteredIndicators.length === 0) return;
+
+                const unsurCard = document.createElement('div');
+                unsurCard.className = 'bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4';
+
+                let unsurHeaderHTML = `
+                    <div class="border-b pb-3 border-slate-200 dark:border-slate-700">
+                        <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Unsur Tugas Utama ${unsur.code}</span>
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-white mt-0.5">${unsur.title}</h3>
+                    </div>
+                `;
+
+                let indicatorsHTML = '<div class="space-y-4">';
+
+                filteredIndicators.forEach((ind, idx) => {
+                    compTotalCount++;
+                    const indData = appState.scores[ind.id] || { score: 0, note: '', link: '' };
+                    if (indData.score > 0) {
+                        compFilledCount++;
+                        compScoreSum += indData.score;
+                    }
+
+                    const isDigBadge = ind.isDigital ? `<span class="bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-laptop-code"></i> Digital</span>` : '';
+                    const isKwuBadge = ind.isKewirausahaan ? `<span class="bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-lightbulb"></i> Kewirausahaan</span>` : '';
+
+                    indicatorsHTML += `
+                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 space-y-3 transition hover:border-emerald-300">
+                            <div class="flex flex-wrap items-start justify-between gap-2">
+                                <div class="space-y-1 max-w-2xl">
+                                    <div class="flex items-center gap-2">
+                                        <span class="bg-emerald-700 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded">${ind.id}</span>
+                                        ${isDigBadge}
+                                        ${isKwuBadge}
+                                    </div>
+                                    <p class="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug">${ind.text}</p>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 italic"><strong>Bukti Fisik Diharapkan:</strong> ${ind.evidence}</p>
+                                </div>
+
+                                <!-- SCORING BUTTONS 1 - 4 -->
+                                <div class="flex items-center space-x-1.5 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    ${[1, 2, 3, 4].map(s => {
+                                        const active = indData.score === s;
+                                        let btnClass = "w-8 h-8 rounded-lg text-xs font-extrabold transition flex items-center justify-center ";
+                                        if (active) {
+                                            if (s === 4) btnClass += "bg-emerald-600 text-white shadow-md scale-105";
+                                            else if (s === 3) btnClass += "bg-blue-600 text-white shadow-md scale-105";
+                                            else if (s === 2) btnClass += "bg-amber-500 text-white shadow-md scale-105";
+                                            else if (s === 1) btnClass += "bg-rose-600 text-white shadow-md scale-105";
+                                        } else {
+                                            btnClass += "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600";
+                                        }
+                                        return `<button onclick="setIndicatorScore('${ind.id}', ${s})" class="${btnClass}">${s}</button>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+
+                            <!-- PAPERLESS DIGITAL EVIDENCE LINK & NOTES -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 mb-0.5"><i class="fa-solid fa-link text-blue-500"></i> Link Bukti Digital / Cloud Drive (Paperless Audit)</label>
+                                    <div class="flex items-center space-x-1">
+                                        <input type="url" placeholder="https://drive.google.com/file/..." value="${indData.link || ''}" onchange="updateIndicatorMeta('${ind.id}', 'link', this.value)" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-2.5 py-1 text-[11px] focus:ring-1 focus:ring-emerald-500 outline-none">
+                                        ${indData.link ? `<a href="${indData.link}" target="_blank" class="p-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 mb-0.5"><i class="fa-solid fa-pen-to-square text-amber-500"></i> Catatan/Temuan Penilai</label>
+                                    <input type="text" placeholder="Catatan kesesuaian bukti fisik..." value="${indData.note || ''}" onchange="updateIndicatorMeta('${ind.id}', 'note', this.value)" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-2.5 py-1 text-[11px] focus:ring-1 focus:ring-emerald-500 outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                indicatorsHTML += '</div>';
+                unsurCard.innerHTML = unsurHeaderHTML + indicatorsHTML;
+                container.appendChild(unsurCard);
+            });
+
+            document.getElementById('activeCompBadge').innerText = `${compFilledCount} / ${compTotalCount} Terisi`;
+            const avgScore = compFilledCount > 0 ? (compScoreSum / compFilledCount).toFixed(2) : '0.00';
+            document.getElementById('activeCompAvg').innerText = avgScore;
+        }
+
+        /* ==========================================================================
+           SCORING & META UPDATES
+           ========================================================================== */
+        function setIndicatorScore(indId, scoreVal) {
+            if (!appState.scores[indId]) appState.scores[indId] = { score: 0, note: '', link: '' };
+            appState.scores[indId].score = scoreVal;
+            saveStateToLocalStorage();
+            renderIndicators();
+            updateAllCalculations();
+        }
+
+        function updateIndicatorMeta(indId, key, value) {
+            if (!appState.scores[indId]) appState.scores[indId] = { score: 0, note: '', link: '' };
+            appState.scores[indId][key] = value;
+            saveStateToLocalStorage();
+        }
+
+        function saveIdentitasFromUI() {
+            appState.identitas.jenisPenilaian = document.getElementById('jenisPenilaian').value;
+            appState.identitas.tahunKe = document.getElementById('tahunKe').value;
+            appState.identitas.tahunPelajaran = document.getElementById('tahunPelajaran').value;
+            appState.identitas.tglPenilaian = document.getElementById('tglPenilaian').value;
+
+            appState.identitas.kamadNama = document.getElementById('kamadNama').value;
+            appState.identitas.kamadNip = document.getElementById('kamadNip').value;
+            appState.identitas.kamadGolongan = document.getElementById('kamadGolongan').value;
+            appState.identitas.kamadTmt = document.getElementById('kamadTmt').value;
+            appState.identitas.kamadPendidikan = document.getElementById('kamadPendidikan').value;
+
+            appState.identitas.madrasahNama = document.getElementById('madrasahNama').value;
+            appState.identitas.madrasahNsm = document.getElementById('madrasahNsm').value;
+            appState.identitas.madrasahStatus = document.getElementById('madrasahStatus').value;
+            appState.identitas.madrasahAlamat = document.getElementById('madrasahAlamat').value;
+            appState.identitas.madrasahKabupaten = document.getElementById('madrasahKabupaten').value;
+            appState.identitas.madrasahProvinsi = document.getElementById('madrasahProvinsi').value;
+
+            appState.identitas.penilai1 = {
+                active: document.getElementById('penilai1_active').checked,
+                nama: document.getElementById('penilai1_nama').value,
+                nip: document.getElementById('penilai1_nip').value
+            };
+            appState.identitas.penilai2 = {
+                active: document.getElementById('penilai2_active').checked,
+                nama: document.getElementById('penilai2_nama').value,
+                nip: document.getElementById('penilai2_nip').value
+            };
+            appState.identitas.penilai3 = {
+                active: document.getElementById('penilai3_active').checked,
+                nama: document.getElementById('penilai3_nama').value,
+                nip: document.getElementById('penilai3_nip').value
+            };
+            appState.identitas.penilai4 = {
+                active: document.getElementById('penilai4_active').checked,
+                nama: document.getElementById('penilai4_nama').value,
+                nip: document.getElementById('penilai4_nip').value
+            };
+
+            appState.identitas.catatanKelebihan = document.getElementById('catatanKelebihan').value;
+            appState.identitas.catatanRekomendasi = document.getElementById('catatanRekomendasi').value;
+
+            saveStateToLocalStorage();
+        }
+
+        function saveIdentitasForm() {
+            saveIdentitasFromUI();
+            switchTab('tab-instrumen');
+        }
+
+        /* ==========================================================================
+           CALCULATIONS & SCORE COMPUTATION
+           ========================================================================== */
+        function computeScores() {
+            const is4Thn = appState.identitas.jenisPenilaian === '4tahunan';
+            const compsToCalculate = is4Thn ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
+
+            let grandTotalMax = 0;
+            let grandTotalRiil = 0;
+            let grandTotalIndikatorCount = 0;
+            let totalFilledCount = 0;
+
+            let digitalMax = 0, digitalRiil = 0;
+            let kwuMax = 0, kwuRiil = 0;
+
+            const compResults = {};
+
+            compsToCalculate.forEach(cNum => {
+                const compDef = INSTRUMEN_DATA.find(c => c.compNumber === cNum);
+                if (!compDef) return;
+
+                let cIndCount = 0;
+                let cMaxScore = 0;
+                let cRiilScore = 0;
+                let cFilledCount = 0;
+
+                compDef.unsurs.forEach(u => {
+                    u.indicators.forEach(ind => {
+                        cIndCount++;
+                        cMaxScore += 4;
+                        const score = appState.scores[ind.id]?.score || 0;
+                        cRiilScore += score;
+                        if (score > 0) cFilledCount++;
+
+                        if (ind.isDigital) {
+                            digitalMax += 4;
+                            digitalRiil += score;
+                        }
+                        if (ind.isKewirausahaan) {
+                            kwuMax += 4;
+                            kwuRiil += score;
+                        }
+                    });
+                });
+
+                const capPercent = cMaxScore > 0 ? (cRiilScore / cMaxScore) * 100 : 0;
+                let kat = getPredikatCategory(capPercent);
+
+                compResults[cNum] = {
+                    title: compDef.title,
+                    indCount: cIndCount,
+                    maxScore: cMaxScore,
+                    riilScore: cRiilScore,
+                    filledCount: cFilledCount,
+                    percent: capPercent,
+                    category: kat
+                };
+
+                grandTotalIndikatorCount += cIndCount;
+                grandTotalMax += cMaxScore;
+                grandTotalRiil += cRiilScore;
+                totalFilledCount += cFilledCount;
+            });
+
+            const overallPercent = grandTotalMax > 0 ? (grandTotalRiil / grandTotalMax) * 100 : 0;
+            const overallPredikat = getPredikatCategory(overallPercent);
+
+            const digitalPercent = digitalMax > 0 ? (digitalRiil / digitalMax) * 100 : 0;
+            const kwuPercent = kwuMax > 0 ? (kwuRiil / kwuMax) * 100 : 0;
+
+            return {
+                compResults,
+                grandTotalIndikatorCount,
+                grandTotalMax,
+                grandTotalRiil,
+                totalFilledCount,
+                overallPercent,
+                overallPredikat,
+                digitalPercent,
+                kwuPercent
+            };
+        }
+
+        function getPredikatCategory(percent) {
+            if (percent >= 91.00) return { label: "Amat Baik", code: "A", color: "bg-emerald-100 text-emerald-800" };
+            if (percent >= 76.00) return { label: "Baik", code: "B", color: "bg-blue-100 text-blue-800" };
+            if (percent >= 61.00) return { label: "Cukup", code: "C", color: "bg-amber-100 text-amber-800" };
+            if (percent >= 51.00) return { label: "Sedang", code: "D", color: "bg-orange-100 text-orange-800" };
+            return { label: "Kurang", code: "E", color: "bg-rose-100 text-rose-800" };
+        }
+
+        function updateNavBadges() {
+            const data = computeScores();
+            const progressTxt = `${data.totalFilledCount} / ${data.grandTotalIndikatorCount} (${Math.round((data.totalFilledCount / data.grandTotalIndikatorCount) * 100)}%)`;
+            document.getElementById('navProgressText').innerText = progressTxt;
+            document.getElementById('navProgressBar').style.width = `${(data.totalFilledCount / data.grandTotalIndikatorCount) * 100}%`;
+
+            document.getElementById('navTotalScore').innerText = data.overallPercent.toFixed(2);
+            document.getElementById('navPredikatBadge').innerText = data.overallPredikat.label;
+        }
+
+        function updateAllCalculations() {
+            updateNavBadges();
+        }
+
+        /* ==========================================================================
+           REKAPITULASI TAB & CHART UPDATES
+           ========================================================================== */
+        function updateRekapitulasiView() {
+            saveIdentitasFromUI();
+            const data = computeScores();
+
+            document.getElementById('rekapNilaiAkhir').innerText = data.overallPercent.toFixed(2);
+            const badgeEl = document.getElementById('rekapPredikat');
+            badgeEl.innerText = `${data.overallPredikat.label} (${data.overallPredikat.code})`;
+            badgeEl.className = `inline-block mt-2 text-xs px-2.5 py-0.5 rounded-full font-bold ${data.overallPredikat.color}`;
+
+            document.getElementById('rekapSkorTotal').innerText = `${data.grandTotalRiil} / ${data.grandTotalMax}`;
+            document.getElementById('rekapMaxSkorText').innerText = `Maksimal Skor: ${data.grandTotalMax}`;
+
+            document.getElementById('rekapDigitalScore').innerText = `${data.digitalPercent.toFixed(2)} %`;
+            document.getElementById('rekapKewirausahaanScore').innerText = `${data.kwuPercent.toFixed(2)} %`;
+
+            // Populate Table Body
+            const tbody = document.getElementById('rekapTableBody');
+            tbody.innerHTML = '';
+
+            Object.keys(data.compResults).forEach(cNum => {
+                const res = data.compResults[cNum];
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/50";
+                tr.innerHTML = `
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-bold">${cNum}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">${res.title}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 text-center">${res.indCount}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-mono">${res.maxScore}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-mono font-bold text-emerald-600">${res.riilScore}</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-bold">${res.percent.toFixed(2)}%</td>
+                    <td class="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-bold"><span class="px-2 py-0.5 rounded ${res.category.color}">${res.category.label}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Pengembangan', 'Manajerial', 'Kewirausahaan', 'Supervisi', 'Hasil 4-Thn'],
+                    datasets: [{
+                        label: 'Capaian (%)',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: '#10b981',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#047857'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(150, 150, 150, 0.2)' },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!radarChartInstance) return;
+            const data = computeScores();
+            const compValues = [
+                data.compResults[1]?.percent || 0,
+                data.compResults[2]?.percent || 0,
+                data.compResults[3]?.percent || 0,
+                data.compResults[4]?.percent || 0,
+                data.compResults[5]?.percent || 0
+            ];
+            radarChartInstance.data.datasets[0].data = compValues;
+            radarChartInstance.update();
+        }
+
+        /* ==========================================================================
+           A4 REPORT PRINT & PDF PREVIEW
+           ========================================================================== */
+        function updatePrintView() {
+            saveIdentitasFromUI();
+            const id = appState.identitas;
+            const data = computeScores();
+
+            document.getElementById('printKankemenag').innerText = id.madrasahKabupaten ? `KANTOR KEMENTERIAN AGAMA ${id.madrasahKabupaten.toUpperCase()}` : 'KANTOR KEMENTERIAN AGAMA KABUPATEN/KOTA';
+            document.getElementById('printMadrasahHeader').innerText = id.madrasahNama ? id.madrasahNama.toUpperCase() : 'SATUAN PENDIDIKAN MADRASAH';
+            document.getElementById('printAlamatHeader').innerText = `${id.madrasahAlamat || 'Alamat Madrasah'} | Kab/Kota: ${id.madrasahKabupaten || '-'} | Prov: ${id.madrasahProvinsi || '-'}`;
+
+            document.getElementById('printPeriodeJudul').innerText = `Jenis Penilaian: ${id.jenisPenilaian === '4tahunan' ? 'Kumulatif 4 Tahunan' : 'Tahunan (' + id.tahunKe + ')'} | Tahun Pelajaran ${id.tahunPelajaran}`;
+
+            document.getElementById('printKamadNama').innerText = id.kamadNama || '-';
+            document.getElementById('printKamadNip').innerText = id.kamadNip || '-';
+            document.getElementById('printKamadGol').innerText = id.kamadGolongan || '-';
+            document.getElementById('printKamadTmt').innerText = id.kamadTmt || '-';
+
+            document.getElementById('printMadrasahNama').innerText = id.madrasahNama || '-';
+            document.getElementById('printMadrasahNsm').innerText = id.madrasahNsm || '-';
+            document.getElementById('printMadrasahStatus').innerText = id.madrasahStatus || '-';
+            document.getElementById('printMadrasahKabProv').innerText = `${id.madrasahKabupaten || '-'} / ${id.madrasahProvinsi || '-'}`;
+
+            // Populate Print Rekap Table
+            const tbody = document.getElementById('printTableRekapBody');
+            tbody.innerHTML = '';
+
+            Object.keys(data.compResults).forEach(cNum => {
+                const res = data.compResults[cNum];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="border border-slate-800 p-1.5">${cNum}</td>
+                    <td class="border border-slate-800 p-1.5 text-left font-medium">${res.title}</td>
+                    <td class="border border-slate-800 p-1.5">${res.indCount}</td>
+                    <td class="border border-slate-800 p-1.5">${res.maxScore}</td>
+                    <td class="border border-slate-800 p-1.5 font-bold">${res.riilScore}</td>
+                    <td class="border border-slate-800 p-1.5 font-bold">${res.percent.toFixed(2)}%</td>
+                    <td class="border border-slate-800 p-1.5 font-bold">${res.category.label}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('printTotalIndikatorCount').innerText = data.grandTotalIndikatorCount;
+            document.getElementById('printTotalMaxScore').innerText = data.grandTotalMax;
+            document.getElementById('printTotalRiilScore').innerText = data.grandTotalRiil;
+            document.getElementById('printTotalCapaianPercent').innerText = `${data.overallPercent.toFixed(2)}%`;
+            document.getElementById('printPredikatLabel').innerText = `${data.overallPredikat.label} (${data.overallPredikat.code})`;
+
+            document.getElementById('printCatatanKelebihan').innerText = id.catatanKelebihan || 'Belum ada catatan keunggulan.';
+            document.getElementById('printCatatanRekomendasi').innerText = id.catatanRekomendasi || 'Belum ada rekomendasi tindak lanjut.';
+
+            // Render Signatures
+            const tglStr = formatDateIndonesian(id.tglPenilaian);
+            document.getElementById('printTglLokasi').innerText = `${id.madrasahKabupaten || 'Kota'}, ${tglStr}`;
+
+            const sigGrid = document.getElementById('printSignaturesGrid');
+            sigGrid.innerHTML = '';
+
+            // Signature Kamad
+            const kamadSigHTML = `
+                <div class="space-y-12">
+                    <p>Kepala Madrasah yang Dinilai,</p>
+                    <div class="pt-8">
+                        <p class="font-bold underline">${id.kamadNama || '...........................................'}</p>
+                        <p>NIP. ${id.kamadNip || '...................................'}</p>
+                    </div>
+                </div>
+            `;
+            sigGrid.innerHTML += kamadSigHTML;
+
+            // Active Assessors Signatures
+            const activeAssessors = [];
+            if (id.penilai1?.active) activeAssessors.push({ title: "Pengawas Pembina (Ketua Tim)", nama: id.penilai1.nama, nip: id.penilai1.nip });
+            if (id.penilai2?.active) activeAssessors.push({ title: "Pengawas Penilai (Anggota)", nama: id.penilai2.nama, nip: id.penilai2.nip });
+            if (id.penilai3?.active) activeAssessors.push({ title: "Kepala Seksi Penmad Kankemenag", nama: id.penilai3.nama, nip: id.penilai3.nip });
+            if (id.penilai4?.active) activeAssessors.push({ title: "Ketua Tim GTK Kanwil Kemenag", nama: id.penilai4.nama, nip: id.penilai4.nip });
+
+            activeAssessors.forEach(ass => {
+                sigGrid.innerHTML += `
+                    <div class="space-y-12">
+                        <p>${ass.title},</p>
+                        <div class="pt-8">
+                            <p class="font-bold underline">${ass.nama || '...........................................'}</p>
+                            <p>NIP. ${ass.nip || '...................................'}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function formatDateIndonesian(dateStr) {
+            if (!dateStr) return '28 Oktober 2026';
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return `${parseInt(parts[2])} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+            }
+            return dateStr;
+        }
+
+        /* ==========================================================================
+           PDF DOWNLOAD FUNCTION
+           ========================================================================== */
+        function downloadPDFDocument() {
+            const printElement = document.getElementById('printArea');
+            const kamadNameClean = (appState.identitas.kamadNama || 'Kepala_Madrasah').replace(/[^a-zA-Z0-9]/g, '_');
+
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `Laporan_PKKM_${kamadNameClean}_2026.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Using html2canvas + jsPDF
+            const { jsPDF } = window.jspdf;
+
+            html2canvas(printElement, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190; // A4 width 210 minus margins
+                const pageHeight = 287; // A4 height 297 minus margins
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 10;
+
+                pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`Hasil_PKKM_${kamadNameClean}.pdf`);
+            });
+        }
+
+        /* ==========================================================================
+           THEME & BACKUP DATA MANAGEMENT
+           ========================================================================== */
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('themeIcon').className = isDark ? "fa-solid fa-sun text-lg text-amber-300" : "fa-solid fa-moon text-lg";
+        }
+
+        function exportDataJSON() {
+            saveIdentitasFromUI();
+            const jsonStr = JSON.stringify(appState, null, 2);
+            const blob = new Blob([jsonStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Backup_PKKM_${(appState.identitas.kamadNama || 'Madrasah').replace(/\s+/g, '_')}_2026.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && parsed.identitas && parsed.scores) {
+                        appState = parsed;
+                        saveStateToLocalStorage();
+                        initFormValues();
+                        renderIndicators();
+                        updateAllCalculations();
+                        alert("Data cadangan PKKM berhasil diimpor!");
+                    } else {
+                        alert("Format berkas JSON tidak valid.");
+                    }
+                } catch(err) {
+                    alert("Gagal membaca berkas JSON: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAllDataModal() {
+            openModal("Reset Seluruh Data PKKM", "Apakah Anda yakin ingin menghapus seluruh data penilaian, identitas, dan skor? Tindakan ini tidak dapat dibatalkan.", function() {
+                localStorage.removeItem('PKKM_2026_DATA');
+                location.reload();
+            });
+        }
+
+        function openModal(title, body, confirmCallback) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = body;
+            const confirmBtn = document.getElementById('modalConfirmBtn');
+            confirmBtn.onclick = function() {
+                confirmCallback();
+                closeModal();
+            };
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
