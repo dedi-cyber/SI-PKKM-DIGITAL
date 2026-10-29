@@ -248,6 +248,43 @@
                     </div>
                 </div>
 
+                <div id="timWrap" class="mb-6 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+                    <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide mb-1">Tim Penilai Tahun Keempat: Guru, Tendik, dan Komite (hanya 4 Tahunan)</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Setiap unsur terdiri dari dua orang sesuai SK 1111/2019. Skor unsur GR, TK, dan KM dihitung dari rata-rata kedua penilainya. Jika belum ada skor penilai, nilai peran di atas yang dipakai.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Guru 1</label>
+                            <input type="text" id="tim_g1_nama" placeholder="Nama lengkap & gelar" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none mb-1">
+                            <input type="text" id="tim_g1_nip" placeholder="NIP / identitas" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Guru 2</label>
+                            <input type="text" id="tim_g2_nama" placeholder="Nama lengkap & gelar" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none mb-1">
+                            <input type="text" id="tim_g2_nip" placeholder="NIP / identitas" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Tendik 1</label>
+                            <input type="text" id="tim_t1_nama" placeholder="Nama lengkap & gelar" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none mb-1">
+                            <input type="text" id="tim_t1_nip" placeholder="NIP / identitas" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Tendik 2</label>
+                            <input type="text" id="tim_t2_nama" placeholder="Nama lengkap & gelar" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none mb-1">
+                            <input type="text" id="tim_t2_nip" placeholder="NIP / identitas" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Komite Madrasah 1</label>
+                            <input type="text" id="tim_k1_nama" placeholder="Nama lengkap & gelar" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none mb-1">
+                            <input type="text" id="tim_k1_nip" placeholder="NIP / identitas" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Komite Madrasah 2</label>
+                            <input type="text" id="tim_k2_nama" placeholder="Nama lengkap & gelar" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none mb-1">
+                            <input type="text" id="tim_k2_nip" placeholder="NIP / identitas" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- DATA KEPALA MADRASAH & MADRASAH -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 border-t pt-6 border-slate-200 dark:border-slate-700">
                     <!-- Column 1: Kamad -->
@@ -1049,6 +1086,7 @@
            GLOBAL APP STATE & INITIALIZATION
            ========================================================================== */
         let appState = {
+            activeAssessorKey: 'score',
             identitas: {
                 jenisPenilaian: 'tahunan',
                 tahunKe: 'Tahun Ke-1',
@@ -1069,6 +1107,7 @@
                 penilai2: { active: true, nama: '', nip: '' },
                 penilai3: { active: false, nama: '', nip: '' },
                 penilai4: { active: false, nama: '', nip: '' },
+                tim: { g1: { nama: '', nip: '' }, g2: { nama: '', nip: '' }, t1: { nama: '', nip: '' }, t2: { nama: '', nip: '' }, k1: { nama: '', nip: '' }, k2: { nama: '', nip: '' } },
                 catatanKelebihan: '',
                 catatanRekomendasi: ''
             },
@@ -1114,6 +1153,11 @@
             const pr = id.peran || {};
             ['KB','KS','GR','TK','KM','GTK','KY'].forEach(k => { document.getElementById('peran_' + k).value = pr[k] ?? ''; });
             document.getElementById('peranTipe').value = pr.tipe || (id.madrasahStatus === 'Swasta' ? 'swasta' : 'negeri');
+            ['g1','g2','t1','t2','k1','k2'].forEach(k => {
+                const t = (id.tim && id.tim[k]) || {};
+                document.getElementById('tim_' + k + '_nama').value = t.nama || '';
+                document.getElementById('tim_' + k + '_nip').value = t.nip || '';
+            });
             refreshLogoUI();
 
             document.getElementById('kamadNama').value = id.kamadNama || '';
@@ -1263,9 +1307,46 @@
             return `<div class="flex items-center gap-1.5"><span class="text-[10px] font-bold text-slate-500 w-6">${label}</span><div class="flex items-center space-x-1">${btns}</div></div>`;
         }
 
+        const ASSESSOR_OPTS = [
+            { key: 'score', label: 'Pengawas 1', short: 'P1', tahunan: true },
+            { key: 'score2', label: 'Pengawas 2', short: 'P2', tahunan: true },
+            { key: 'g1', label: 'Guru 1', short: 'G1', tahunan: false },
+            { key: 'g2', label: 'Guru 2', short: 'G2', tahunan: false },
+            { key: 't1', label: 'Tendik 1', short: 'T1', tahunan: false },
+            { key: 't2', label: 'Tendik 2', short: 'T2', tahunan: false },
+            { key: 'k1', label: 'Komite 1', short: 'K1', tahunan: false },
+            { key: 'k2', label: 'Komite 2', short: 'K2', tahunan: false }
+        ];
+
+        function activeAssessorKey() {
+            const is4 = appState.identitas.jenisPenilaian === '4tahunan';
+            const k = appState.activeAssessorKey || 'score';
+            const opt = ASSESSOR_OPTS.find(o => o.key === k);
+            if (!opt || (!is4 && !opt.tahunan)) return 'score';
+            return k;
+        }
+
+        function setActiveAssessor(key) {
+            appState.activeAssessorKey = key;
+            saveStateToLocalStorage();
+            renderIndicators();
+        }
+
+        function renderAssessorSelector() {
+            const is4 = appState.identitas.jenisPenilaian === '4tahunan';
+            const cur = activeAssessorKey();
+            const opts = ASSESSOR_OPTS.filter(o => is4 || o.tahunan)
+                .map(o => `<option value="${o.key}" ${o.key === cur ? 'selected' : ''}>${o.label}</option>`).join('');
+            return `<div class="mb-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-wrap items-center gap-3">
+                <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Menginput skor dari:</label>
+                <select id="assessorSelect" onchange="setActiveAssessor(this.value)" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm outline-none">${opts}</select>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">Pilih penilai, lalu isi skor 1 sampai 4 pada setiap indikator.</span>
+            </div>`;
+        }
+
         function renderIndicators() {
             const container = document.getElementById('indicatorsContainer');
-            container.innerHTML = '';
+            container.innerHTML = renderAssessorSelector();
 
             const currentComp = INSTRUMEN_DATA.find(c => c.compNumber === appState.activeComponentFilter);
             if (!currentComp) return;
@@ -1324,8 +1405,7 @@
 
                                 <!-- SCORING BUTTONS: PENILAI 1 DAN PENILAI 2 -->
                                 <div class="flex flex-col gap-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                                    ${renderScoreGroup(ind.id, indData, 'score', 'P1')}
-                                    ${appState.identitas.penilai2?.active ? renderScoreGroup(ind.id, indData, 'score2', 'P2') : ''}
+                                    ${renderScoreGroup(ind.id, indData, activeAssessorKey(), ASSESSOR_OPTS.find(o => o.key === activeAssessorKey()).short)}
                                 </div>
                             </div>
 
@@ -1420,6 +1500,10 @@
             ['KB','KS','GR','TK','KM','GTK','KY'].forEach(k => { pr[k] = document.getElementById('peran_' + k).value; });
             pr.tipe = document.getElementById('peranTipe').value;
             appState.identitas.peran = pr;
+            appState.identitas.tim = {};
+            ['g1','g2','t1','t2','k1','k2'].forEach(k => {
+                appState.identitas.tim[k] = { nama: document.getElementById('tim_' + k + '_nama').value, nip: document.getElementById('tim_' + k + '_nip').value };
+            });
 
             appState.identitas.kamadNama = document.getElementById('kamadNama').value;
             appState.identitas.kamadNip = document.getElementById('kamadNip').value;
@@ -1473,6 +1557,9 @@
             const id = appState.identitas;
             const is4Thn = id.jenisPenilaian === '4tahunan';
             const compsToCalculate = is4Thn ? [1, 2, 3, 4, 5] : [1, 2, 3, 4];
+            const MEMBER_KEYS = ['score', 'score2', 'g1', 'g2', 't1', 't2', 'k1', 'k2'];
+            const memberSum = {}, memberCnt = {};
+            MEMBER_KEYS.forEach(k => { memberSum[k] = 0; memberCnt[k] = 0; });
             const useP2 = !!id.penilai2?.active;
 
             let grandMax = 0, grandRiil1 = 0, grandRiil2 = 0, grandIndCount = 0, totalFilledCount = 0;
@@ -1497,6 +1584,11 @@
                         cRiil1 += s1;
                         cRiil2 += s2;
                         if (s1 > 0 || s2 > 0) cFilled++;
+                        MEMBER_KEYS.forEach(k => {
+                            const v = d[k] || 0;
+                            memberSum[k] += v;
+                            if (v > 0) memberCnt[k]++;
+                        });
 
                         if (ind.isDigital) { digitalMax += 4; digitalRiil += sAvg; }
                         if (ind.isKewirausahaan) { kwuMax += 4; kwuRiil += sAvg; }
@@ -1536,7 +1628,13 @@
             const pr = id.peran || {};
             const num = v => { const x = parseFloat(v); return isNaN(x) ? null : x; };
             const PM = nkt;
-            const KB = num(pr.KB), KS = num(pr.KS), GR = num(pr.GR), TK = num(pr.TK), KM = num(pr.KM), GTK = num(pr.GTK), KY = num(pr.KY);
+            const memberNK = k => memberCnt[k] > 0 && grandMax > 0 ? memberSum[k] / grandMax * 100 : null;
+            const avgNN = arr => { const v = arr.filter(x => x !== null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+            const grAuto = avgNN([memberNK('g1'), memberNK('g2')]);
+            const tkAuto = avgNN([memberNK('t1'), memberNK('t2')]);
+            const kmAuto = avgNN([memberNK('k1'), memberNK('k2')]);
+            const KB = num(pr.KB), KS = num(pr.KS), GTK = num(pr.GTK), KY = num(pr.KY);
+            const GR = grAuto ?? num(pr.GR), TK = tkAuto ?? num(pr.TK), KM = kmAuto ?? num(pr.KM);
             let nkteHitung = null;
             if (is4Thn) {
                 if (pr.tipe === 'man_ic') {
@@ -1786,6 +1884,14 @@
             if (id.penilai2?.active) activeAssessors.push({ title: "Pengawas Penilai (Anggota)", nama: id.penilai2.nama, nip: id.penilai2.nip });
             if (id.penilai3?.active) activeAssessors.push({ title: "Kepala Seksi Penmad Kankemenag", nama: id.penilai3.nama, nip: id.penilai3.nip });
             if (id.penilai4?.active) activeAssessors.push({ title: "Ketua Tim GTK Kanwil Kemenag", nama: id.penilai4.nama, nip: id.penilai4.nip });
+
+            if (id.jenisPenilaian === '4tahunan') {
+                const timLabel = { g1: 'Guru (Anggota Tim)', g2: 'Guru (Anggota Tim)', t1: 'Tenaga Kependidikan (Anggota Tim)', t2: 'Tenaga Kependidikan (Anggota Tim)', k1: 'Pengurus Komite Madrasah (Anggota Tim)', k2: 'Pengurus Komite Madrasah (Anggota Tim)' };
+                ['g1','g2','t1','t2','k1','k2'].forEach(k => {
+                    const t = (id.tim && id.tim[k]) || {};
+                    if (t.nama) activeAssessors.push({ title: timLabel[k], nama: t.nama, nip: t.nip });
+                });
+            }
 
             activeAssessors.forEach(ass => {
                 sigGrid.innerHTML += `
