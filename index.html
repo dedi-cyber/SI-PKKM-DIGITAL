@@ -225,6 +225,29 @@
                     <p id="peranStatus" class="text-[11px] mt-2 text-slate-500 dark:text-slate-400"></p>
                 </div>
 
+                <div class="mb-6 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+                    <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide mb-1">Logo Kop Surat (opsional)</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Logo tampil di kiri dan kanan kop cetak. Ukuran maksimal 300 KB per logo. Jika kosong, kop memakai ikon bawaan.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Logo kiri (misalnya Kemenag)</label>
+                            <input type="file" accept="image/*" id="logoInputKiri" onchange="handleLogoUpload('Kiri', this)" class="text-xs">
+                            <div class="mt-2 flex items-center gap-3">
+                                <img id="logoPreviewKiri" alt="Pratinjau logo kiri" class="hidden h-14 w-14 object-contain border border-slate-200 rounded bg-white">
+                                <button type="button" onclick="clearLogo('Kiri')" class="text-xs text-rose-600 hover:underline">Hapus logo</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">Logo kanan (misalnya madrasah)</label>
+                            <input type="file" accept="image/*" id="logoInputKanan" onchange="handleLogoUpload('Kanan', this)" class="text-xs">
+                            <div class="mt-2 flex items-center gap-3">
+                                <img id="logoPreviewKanan" alt="Pratinjau logo kanan" class="hidden h-14 w-14 object-contain border border-slate-200 rounded bg-white">
+                                <button type="button" onclick="clearLogo('Kanan')" class="text-xs text-rose-600 hover:underline">Hapus logo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- DATA KEPALA MADRASAH & MADRASAH -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 border-t pt-6 border-slate-200 dark:border-slate-700">
                     <!-- Column 1: Kamad -->
@@ -558,7 +581,7 @@
                 <!-- OFFICIAL KOP SURAT -->
                 <div class="border-b-4 border-double border-slate-900 pb-3 text-center relative flex items-center justify-between">
                     <div class="w-16 h-16 flex items-center justify-center">
-                        <i class="fa-solid fa-kaaba text-4xl text-emerald-800"></i>
+                        <img id="printLogoKiri" alt="Logo kiri" class="hidden" style="max-height:64px;max-width:64px;object-fit:contain"><i id="printIconKiri" class="fa-solid fa-kaaba text-4xl text-emerald-800"></i>
                     </div>
                     <div class="flex-grow text-center px-4">
                         <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h4>
@@ -567,7 +590,7 @@
                         <p class="text-[10px] text-slate-600 mt-0.5" id="printAlamatHeader">Alamat Lengkap Satuan Pendidikan Madrasah</p>
                     </div>
                     <div class="w-16 h-16 flex items-center justify-center">
-                        <i class="fa-solid fa-award text-4xl text-emerald-800"></i>
+                        <img id="printLogoKanan" alt="Logo kanan" class="hidden" style="max-height:64px;max-width:64px;object-fit:contain"><i id="printIconKanan" class="fa-solid fa-award text-4xl text-emerald-800"></i>
                     </div>
                 </div>
 
@@ -1091,6 +1114,7 @@
             const pr = id.peran || {};
             ['KB','KS','GR','TK','KM','GTK','KY'].forEach(k => { document.getElementById('peran_' + k).value = pr[k] ?? ''; });
             document.getElementById('peranTipe').value = pr.tipe || (id.madrasahStatus === 'Swasta' ? 'swasta' : 'negeri');
+            refreshLogoUI();
 
             document.getElementById('kamadNama').value = id.kamadNama || '';
             document.getElementById('kamadNip').value = id.kamadNip || '';
@@ -1348,6 +1372,42 @@
             if (!appState.scores[indId]) appState.scores[indId] = { score: 0, note: '', link: '' };
             appState.scores[indId][key] = value;
             saveStateToLocalStorage();
+        }
+
+        function handleLogoUpload(side, input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            if (file.size > 300 * 1024) {
+                alert('Ukuran logo maksimal 300 KB. Kecilkan dulu gambarnya.');
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                appState.identitas['logo' + side] = e.target.result;
+                saveStateToLocalStorage();
+                refreshLogoUI();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearLogo(side) {
+            appState.identitas['logo' + side] = '';
+            document.getElementById('logoInput' + side).value = '';
+            saveStateToLocalStorage();
+            refreshLogoUI();
+        }
+
+        function refreshLogoUI() {
+            ['Kiri', 'Kanan'].forEach(side => {
+                const src = appState.identitas['logo' + side] || '';
+                const prev = document.getElementById('logoPreview' + side);
+                if (prev) { prev.src = src; prev.classList.toggle('hidden', !src); }
+                const pImg = document.getElementById('printLogo' + side);
+                const pIcon = document.getElementById('printIcon' + side);
+                if (pImg) { pImg.src = src; pImg.classList.toggle('hidden', !src); }
+                if (pIcon) pIcon.classList.toggle('hidden', !!src);
+            });
         }
 
         function saveIdentitasFromUI() {
@@ -1652,6 +1712,7 @@
            A4 REPORT PRINT & PDF PREVIEW
            ========================================================================== */
         function updatePrintView() {
+            refreshLogoUI();
             saveIdentitasFromUI();
             const id = appState.identitas;
             const data = computeScores();
